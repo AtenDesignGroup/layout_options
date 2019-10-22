@@ -1,0 +1,15 @@
+{
+	"name" : "drupal/layout_options",
+	"type" : "drupal-module",
+	"description" : "Layout Options - Configuration options thru Yaml files",
+	"keywords" : [
+		"Drupal"
+	],
+	"homepage" : "https://www.drupal.org/project/layout_options",
+	"support" : {
+		"issues" : "https://www.drupal.org/project/issues/layout_options",
+		"source" : "http://cgit.drupalcode.org/layout_options"
+	},
+	"license" : "GPL-2.0+",
+	"minimum-stability" : "dev",
+}
