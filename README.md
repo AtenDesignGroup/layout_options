@@ -36,7 +36,7 @@ Then enable the module.
 How to Use it
 =============
 
-Note:  This module is a utility module that provides no out of the box 
+Note:  This module is a utility module that provides no out of the box functionality. 
 
 Defining a Layout
 -----------------
@@ -80,7 +80,7 @@ layout 'rules' section. The definitions section defines available options that c
 used with layout. The rules section defines which options will be used with which 
 layouts and/or field (if applicable).
 
-###Option Definitions Section###
+### Option Definitions Section ###
 
 The option definitions consist of a OptionLayout plugin id plus the related configurable 
 items. E.g. a background color option can be defined with yaml information like this:
@@ -113,7 +113,7 @@ This module supplies the following layoutOption plug-ins:
 
 Since these option handlers are plugin based, it is easy to build your own plugins to handle custom needs.
 
-###Layout Options Section (Rules)###
+### Layout Options Section (Rules) ###
 
 This section defines what options (defined above) are used with what layout.  It can also be used
 to override and customize definitions for different layouts.
