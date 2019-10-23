@@ -16,42 +16,42 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
   use StringTranslationTrait;
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getLabel() {
     return $this->pluginDefinition['label'];
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getDescription() {
     return $this->pluginDefinition['description'];
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getDefinition() {
     return $this->getConfiguration()['definition'];
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getOptionId() {
     return $this->getConfiguration()['option_id'];
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getLayoutPlugin() {
     return $this->getConfiguration()['layout_plugin'];
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function addDefaults($configuration) {
     $id = $this->getOptionId();
@@ -92,7 +92,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function buildOption(array $regions, array $build) {
     $optionId = $this->getOptionId();
@@ -109,7 +109,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function addOptionFormElement(string $region, array $form, FormStateInterface $formState) {
     $optionId = $this->getOptionId();
@@ -168,7 +168,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
   abstract public function processOptionBuild(array $regions, array $build, string $region, $value);
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function submitFormOption(array $configuration, array $form, FormStateInterface $formState) {
     $id = $this->getOptionId();
@@ -189,33 +189,33 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function validateFormOption(array &$form, FormStateInterface $formState) {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function validateOptionDefinition(array $optionDefinition) {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function defaultConfiguration() {
     return [];
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getConfiguration() {
     return $this->configuration;
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function setConfiguration(array $configuration) {
     $this->configuration = NestedArray::mergeDeep($this->defaultConfiguration(), $configuration);

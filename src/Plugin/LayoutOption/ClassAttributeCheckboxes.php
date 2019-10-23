@@ -17,21 +17,21 @@ use Drupal\layout_options\OptionBase;
 class ClassAttributeCheckboxes extends OptionBase {
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function validateFormOption(array &$form, FormStateInterface $formState) {
     $this->validateCssIdentifier($form, $formState, TRUE);
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function processFormOption(string $region, array $form, FormStateInterface $formState, $default) {
     return $this->createCheckboxElement($region, $form, $formState, $default);
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function processOptionBuild($regions, $build, $region, $value) {
     return $this->processAttributeOptionBuild('class', $regions, $build, $region, $value);

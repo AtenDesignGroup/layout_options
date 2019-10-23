@@ -17,7 +17,7 @@ use Drupal\layout_options\OptionBase;
 class ClassAttributeSelect extends OptionBase {
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function validateFormOption(array &$form, FormStateInterface $formState) {
     $def = $this->getDefinition();
@@ -25,14 +25,14 @@ class ClassAttributeSelect extends OptionBase {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function processFormOption(string $region, array $form, FormStateInterface $formState, $default) {
     return $this->createSelectElement($region, $form, $formState, $default);
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function processOptionBuild($regions, $build, $region, $value) {
     return $this->processAttributeOptionBuild('class', $regions, $build, $region, $value);
