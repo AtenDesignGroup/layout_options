@@ -6,11 +6,12 @@
  */
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Implements hook_help().
  */
-function layout_options_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_match) {
+function layout_options_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.layout_options':
       $text = file_get_contents(__DIR__ . '/README.md');
