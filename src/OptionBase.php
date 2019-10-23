@@ -331,6 +331,50 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     }
     return $form;
   }
+  /**
+   * Utility function to creates a checkboxes field form element from the option def.
+   *
+   * YAML definition should contain the following settings:
+   *     title: 'Option title'
+   *     description: 'Option description'
+   *     default: 'Option default value' or ''
+   *     inline:  true || false
+   *     options: {
+   *       value1: 'Label 1',
+   *       value2: 'Label 2,
+   *       value3: 'Label 3,
+   *       ...
+   *     }
+   *
+   * @param string $region
+   * @param array $form
+   * @param FormStateInterface $formState
+   * @param mixed $default
+   *
+   * @return array
+   * The modified form
+   */
+  public function createRadiosElement(string $region, array $form, FormStateInterface $formState, $default) {
+    $def = $this->getDefinition();
+    $formRenderArray = [
+        '#title' => $this->t($def['title']),
+        '#description' => $this->t($def['description']),
+        '#type' => 'radios',
+        '#options' => $this->translateOptions($def['options']),
+        '#default_value' => $default,
+    ];
+    if ($def['inline']) {
+      $formRenderArray['#attributes'] = ['class' => ['container-inline']];
+    }
+    $optionId = $this->getOptionId();
+    if ( $region == 'layout') {
+      $form[$optionId] = $formRenderArray;
+    }
+    else {
+      $form[$region][$optionId] = $formRenderArray;
+    }
+    return $form;
+  }
 
   public function processAttributeOptionBuild(string $attribute, array $regions, array $build, string $region, $value) {
     if ( $region == 'layout') {
