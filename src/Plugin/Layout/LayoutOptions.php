@@ -32,7 +32,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
   /**
    * The option plug local cache.
    *
-   * @var /Drupal/layout_options/OptionInterface[]
+   * @var \Drupal\layout_options\OptionInterface[]
    */
   protected $optionPlugins = [];
 
@@ -45,10 +45,10 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
     $configuration = parent::defaultConfiguration();
     $options = $this->parseLayoutOptions($this->getPluginDefinition()->id());
     $keys = array_keys($options);
-    foreach ($keys as $optionId ) {
+    foreach ($keys as $optionId) {
       $optionDef = $this->getLayoutDefinition($optionId);
       $plugin = $this->getOptionPlugin($optionId, $optionDef);
-      if ($plugin !== NULL ) {
+      if ($plugin !== NULL) {
         $configuration = $plugin->addDefaults($configuration);
       }
     }
@@ -59,17 +59,17 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
    * {@inheritdoc}
    */
   public function build(array $regions) {
-    //ksm($this->getPluginDefinition()->id());
+    // ksm($this->getPluginDefinition()->id());
     $configuration = $this->getConfiguration();
     $field = isset($configuration['field_name']) ? $configuration['field_name'] : NULL;
     $build = parent::build($regions);
     $defs = $this->parseLayoutOptions($this->getPluginDefinition()->id(), $field);
 
     $optionIds = array_keys($defs);
-    foreach ($optionIds as $optionId ) {
+    foreach ($optionIds as $optionId) {
       $optionDef = $this->getLayoutDefinition($optionId);
       $plugin = $this->getOptionPlugin($optionId, $optionDef);
-      if ($plugin !== NULL ) {
+      if ($plugin !== NULL) {
         $build = $plugin->buildOption($regions, $build);
       }
     }
@@ -104,26 +104,26 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
     $form_object = $form_state->getFormObject();
     if ($form_object instanceof ContentEntityFormInterface) {
       $field = $form['#parents'][0];
-      $form['field_name'] = array(
-          '#type' => 'value',
-          '#value' => $field,
-      );
+      $form['field_name'] = [
+        '#type' => 'value',
+        '#value' => $field,
+      ];
     }
     $def = $this->parseLayoutOptions($this->getPluginDefinition()->id(), $field);
     $keys = array_keys($def);
-    foreach ($keys as $optionId ) {
+    foreach ($keys as $optionId) {
       $plugin = $this->getOptionPlugin($optionId, $def[$optionId]);
-      if ( $plugin ) {
+      if ($plugin) {
         $form = $plugin->addOptionFormElement('layout', $form, $form_state);
       }
     }
     foreach ($this->getPluginDefinition()->getRegions() as $region => $regionInfo) {
       $regionLabel = $regionInfo['label'];
       $form[$region] = [
-          '#type' => 'details',
-          '#title' => $this->t('@region region', ['@region' => $regionLabel]),
+        '#type' => 'details',
+        '#title' => $this->t('@region region', ['@region' => $regionLabel]),
       ];
-      foreach( $keys as $optionId ) {
+      foreach ($keys as $optionId) {
         $plugin = $this->getOptionPlugin($optionId, $def[$optionId]);
         if ($plugin) {
           $form = $plugin->addOptionFormElement($region, $form, $form_state);
@@ -135,6 +135,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
     }
     return $form;
   }
+
   /**
    * {@inheritdoc}
    */
@@ -146,10 +147,10 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
     $field = $compFormState->getValue('field_name');
     $options = $this->parseLayoutOptions($this->getPluginDefinition()->id(), $field);
     $keys = array_keys($options);
-    foreach ($keys as $optionId ) {
+    foreach ($keys as $optionId) {
       $optionDef = $this->getLayoutDefinition($optionId);
       $plugin = $this->getOptionPlugin($optionId, $optionDef);
-      if ($plugin !== NULL ) {
+      if ($plugin !== NULL) {
         $plugin->validateFormOption($form, $formState);
       }
     }
@@ -169,28 +170,31 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
     $options = $this->parseLayoutOptions($this->getPluginDefinition()->id(), $field);
 
     $keys = array_keys($options);
-    foreach ($keys as $optionId ) {
+    foreach ($keys as $optionId) {
       $optionDef = $this->getLayoutDefinition($optionId);
       $plugin = $this->getOptionPlugin($optionId, $optionDef);
-      if ($plugin !== NULL ) {
+      if ($plugin !== NULL) {
         $configuration = $plugin->submitFormOption($configuration, $form, $formState);
       }
     }
     $this->setConfiguration($configuration);
   }
+
   /**
-   * Parse the layout rules to determine what options should be used in this context.
+   * Parse the layout rules to determine options to use in this context.
    *
    * Note:  The field name may not be available unless options are chosen in
    *        the layout configuration form.
    *
-   * @param string $layoutId  The id of the layout being used
-   * @param string $fieldName  (optional) The field that contains this layout.
+   * @param string $layoutId
+   *   The id of the layout being used.
+   * @param string $fieldName
+   *   (optional) The field that contains this layout.
    *
    * @return string[]
-   * The option definitions that apply to this context.
+   *   The option definitions that apply to this context.
    */
-  function parseLayoutOptions(string $layoutId=NULL, string $fieldName=NULL) {
+  public function parseLayoutOptions(string $layoutId = NULL, string $fieldName = NULL) {
     $rules = $this->getLayoutOptions();
     $options = isset($rules['global']) ? $rules['global'] : [];
     if ($layoutId && isset($rules[$layoutId])) {
@@ -200,9 +204,9 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
       $options = NestedArray::mergeDeep($options, $rules[$fieldName]);
     }
 
-    // Merge definition with rules keeping rule overrides
+    // Merge definition with rules keeping rule overrides.
     $option_definitions = $this->getLayoutDefinitions();
-    foreach ($option_definitions as $option => $config ) {
+    foreach ($option_definitions as $option => $config) {
       if (isset($options[$option])) {
         $definition = [];
         $definition[$option] = $config;
@@ -211,56 +215,66 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
     }
     return $options;
   }
+
   /**
    * Gets the layout options 'rules'.
    *
    * @return string[]
-   * The layout option array or an empty array if none found.
+   *   The layout option array or an empty array if none found.
    */
-  function getLayoutOptions() {
+  public function getLayoutOptions() {
     $schema = $this->getLayoutOptionsSchema();
     return isset($schema['layout_options']) ? $schema['layout_options'] : [];
   }
+
   /**
    * Gets all the layout option definitions.
    *
    * @return string[]
-   * The layout option  definitions keyed by option id or an empty array if not found.
+   *   The layout option  definitions keyed by option id or an empty array
+   *   if not found.
    */
-  function getLayoutDefinitions() {
+  public function getLayoutDefinitions() {
     $schema = $this->getLayoutOptionsSchema();
     return isset($schema['layout_option_definitions']) ? $schema['layout_option_definitions'] : [];
   }
+
   /**
    * Gets a specific layout option definition.
    *
    * @param string $id
+   *   The option id to lookup.
+   *
    * @return string[]
-   * The definition array or an empty array if not found.
+   *   The definition array or an empty array if not found.
    */
-  function getLayoutDefinition($id) {
+  public function getLayoutDefinition($id) {
     $defs = $this->getLayoutDefinitions();
     return isset($defs[$id]) ? $defs[$id] : [];
   }
+
   /**
    * Gets the layout options scheme defined in the layout_options.yml files.
-   * This is a merge of all the yaml files with the last loaded taking precidence.
-   * The order is based on Drupal's module load order followed by the theme load
+   *
+   * This is a merge of all the yaml files with the last loaded taking
+   * precidence. The order is based on Drupal's module load order followed by
+   * the theme load
    * order.
    *
    * @return string[]
-   * The layout options scheme or an empty array if no files found.
+   *   The layout options scheme or an empty array if no files found.
    */
-  function getLayoutOptionsSchema() {
+  public function getLayoutOptionsSchema() {
     if (!isset($this->layoutOptionsSchema)) {
       $results = $this->getYamlDiscovery()->findAll();
       $this->layoutOptionsSchema = [];
-      foreach ( $results as $config ) {
+      foreach ($results as $config) {
         $this->layoutOptionsSchema = NestedArray::mergeDeep($this->layoutOptionsSchema, $config);
       }
     }
     return $this->layoutOptionsSchema;
   }
+
   /**
    * Gets the YAML discovery object used to load the layout_options yaml files..
    *
@@ -278,16 +292,20 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
     }
     return $this->yamlDiscovery;
   }
+
   /**
    * Loads and configure the plugin defined by the specificed option definition.
    *
-   * Note: If a plugin is not specified or is not valid, a watchdog warning is logged.
+   * Note: If a plugin is not specified or is not valid, a watchdog
+   * warning is logged.
    *
-   * @param string $optionId  The definition option id
-   * @param string[] $optionDefinition The array that defines this option's definition.
+   * @param string $optionId
+   *   The definition option id.
+   * @param string[] $optionDefinition
+   *   The array that defines this option's definition.
    *
-   * @return /Drupal/layout_options/OptionInterface | NULL
-   * The plugin or NULL in not found.
+   * @return \Drupal\layout_options\OptionInterface|null
+   *   The plugin or NULL in not found.
    */
   protected function getOptionPlugin(string $optionId, array $optionDefinition) {
     if (!isset($this->optionPlugins[$optionId])) {
@@ -312,4 +330,5 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
     $plugin->setConfiguration($configuration);
     return $plugin;
   }
+
 }

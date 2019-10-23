@@ -8,46 +8,61 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
+/**
+ * The base class for LayoutOption plugins.
+ */
 abstract class OptionBase extends PluginBase implements OptionInterface {
-  use StringTranslationTrait;  // TODO: Can this be injected?
+  // TODO: Can this be injected?
+  use StringTranslationTrait;
 
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\layout_options\OptionInterface::getLabel()
    */
   public function getLabel() {
     return $this->pluginDefinition['label'];
   }
+
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\layout_options\OptionInterface::getDescription()
    */
   public function getDescription() {
     return $this->pluginDefinition['description'];
   }
+
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\layout_options\OptionInterface::getDefinition()
    */
   public function getDefinition() {
     return $this->getConfiguration()['definition'];
   }
+
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\layout_options\OptionInterface::getOptionId()
    */
   public function getOptionId() {
     return $this->getConfiguration()['option_id'];
   }
+
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\layout_options\OptionInterface::getLayoutPlugin()
    */
   public function getLayoutPlugin() {
     return $this->getConfiguration()['layout_plugin'];
   }
+
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\layout_options\OptionInterface::addDefaults()
    */
   public function addDefaults(array $configuration) {
@@ -58,7 +73,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     $regions = array_merge(['layout'], $this->getLayoutDefinition()->getRegionNames());
     foreach ($regions as $region) {
       if ($this->isAllowed($region)) {
-        if ( $region === 'layout') {
+        if ($region === 'layout') {
           $configuration[$id] = $default;
         }
         else {
@@ -73,10 +88,12 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
    * Verify that this option is allowed to be used in this region.
    *
    * @param string $region
+   *   The region to test against.
    *
-   * @return boolean
+   * @return bool
+   *   TRUE if allowed / FALSE if not.
    */
-  public function isAllowed( $region ) {
+  public function isAllowed($region) {
     $def = $this->getDefinition();
     if ($region === 'layout') {
       return $def['layout'];
@@ -88,9 +105,10 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\layout_options\OptionInterface::buildOption()
    */
-  function buildOption(array $regions, array $build) {
+  public function buildOption(array $regions, array $build) {
     $optionId = $this->getOptionId();
     $layoutRegions = array_merge(['layout'], $this->getLayoutDefinition()->getRegionNames());
     $configuration = $this->getLayoutPlugin()->getConfiguration();
@@ -103,16 +121,18 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     }
     return $build;
   }
+
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\layout_options\OptionInterface::addOptionFormElement()
    */
-  function addOptionFormElement(string $region, array $form, FormStateInterface $formState){
+  public function addOptionFormElement(string $region, array $form, FormStateInterface $formState) {
     $optionId = $this->getOptionId();
     $config = $this->getLayoutPlugin()->getConfiguration();
     $default = NULL;
     if ($this->isAllowed($region)) {
-      if ( $region === 'layout' ) {
+      if ($region === 'layout') {
         $default = $config[$optionId];
       }
       else {
@@ -122,36 +142,50 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     }
     return $form;
   }
+
   /**
    * This actually builds the option form element.
+   *
    * Should handle both 'layout' and layout regions.
+   *
    * Simple implementation is to call one of the utility classes and return
    * the results.
+   *
+   * @param string $region
+   *   The region being processed.
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $formState
+   *   The form state object.
+   * @param mixed $default
+   *   The default value to use.
+   *
+   * @return string[]
+   *   The modified form array
    *
    * @see OptionBase::createTextElement
    * @see OptionBase::createSelectElement
    * @see OptionBase::createCheckboxElement
-   *
-   * @param string $region
-   * @param array $form
-   * @param FormStateInterface $formState
-   * @param mixed $default
-   *
-   * @return string[]
-   * The modified form array
    */
-  abstract function processFormOption(string $region, array $form, FormStateInterface $formState, $default);
+  abstract public function processFormOption(string $region, array $form, FormStateInterface $formState, $default);
+
   /**
    * Modify the build render array for this option.
    *
-   * @param string[] $regions  The regions being built
-   * @param string[] $build  The render array
-   * @param string $region  The region being processed.
-   * @param string $value  The configuration value for this option.
+   * @param string[] $regions
+   *   The regions being built.
+   * @param string[] $build
+   *   The render array.
+   * @param string $region
+   *   The region being processed.
+   * @param string $value
+   *   The configuration value for this option.
    */
-  abstract function processOptionBuild($regions, $build, $region, $value);
+  abstract public function processOptionBuild(array $regions, array $build, string $region, $value);
+
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\layout_options\OptionInterface::submitFormOption()
    */
   public function submitFormOption(array $configuration, array $form, FormStateInterface $formState) {
@@ -161,7 +195,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     foreach ($regions as $region) {
       if ($this->isAllowed($region)) {
         $value = $this->getNormalizedValues($this->getFormValue($formState, $region, $id));
-        if ( $region === 'layout') {
+        if ($region === 'layout') {
           $configuration[$id] = $value;
         }
         else {
@@ -171,14 +205,18 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     }
     return $configuration;
   }
+
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\layout_options\OptionInterface::validateFormOption()
    */
   public function validateFormOption(array &$form, FormStateInterface $formState) {
   }
+
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\layout_options\OptionInterface::validateOptionDefinition()
    */
   public function validateOptionDefinition(array $optionDefinition) {
@@ -186,25 +224,31 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\Component\Plugin\ConfigurableInterface::defaultConfiguration()
    */
   public function defaultConfiguration() {
     return [];
   }
+
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\Component\Plugin\ConfigurableInterface::getConfiguration()
    */
   public function getConfiguration() {
     return $this->configuration;
   }
+
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\Component\Plugin\ConfigurableInterface::setConfiguration()
    */
   public function setConfiguration(array $configuration) {
     $this->configuration = NestedArray::mergeDeep($this->defaultConfiguration(), $configuration);
   }
+
   /**
    * Utility function to add a text field form element from the option def.
    *
@@ -215,12 +259,16 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
    *     default: 'Option default value' or ''
    *
    * @param string $region
+   *   The region to create this form.
    * @param array $form
-   * @param FormStateInterface $formState
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $formState
+   *   The form state object.
    * @param mixed $default
+   *   The default value to use.
    *
    * @return array
-   * The modified form
+   *   The modified form
    */
   public function createTextElement(string $region, array $form, FormStateInterface $formState, $default) {
     $def = $this->getDefinition();
@@ -231,7 +279,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
       '#default_value' => !empty($default) ? $default : '',
     ];
     $optionId = $this->getOptionId();
-    if ( $region == 'layout') {
+    if ($region == 'layout') {
       $form[$optionId] = $formRenderArray;
     }
     else {
@@ -241,7 +289,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
   }
 
   /**
-   * Utility function to creates a select field form element from the option def.
+   * Creates a select field form element from the option def.
    *
    * YAML definition should contain the following settings:
    *     title: 'Option title'
@@ -256,12 +304,16 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
    *     }
    *
    * @param string $region
+   *   The region to create this form.
    * @param array $form
-   * @param FormStateInterface $formState
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $formState
+   *   The form state object.
    * @param mixed $default
+   *   The default value to use.
    *
    * @return array
-   * The modified form
+   *   The modified form
    */
   public function createSelectElement(string $region, array $form, FormStateInterface $formState, $default) {
     $def = $this->getDefinition();
@@ -278,7 +330,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
       $formRenderArray['#multiple'] = TRUE;
     }
     $optionId = $this->getOptionId();
-    if ( $region == 'layout') {
+    if ($region == 'layout') {
       $form[$optionId] = $formRenderArray;
     }
     else {
@@ -288,7 +340,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
   }
 
   /**
-   * Utility function to creates a checkboxes field form element from the option def.
+   * Creates a checkboxes field form element from the option def.
    *
    * YAML definition should contain the following settings:
    *     title: 'Option title'
@@ -303,14 +355,18 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
    *     }
    *
    * @param string $region
+   *   The region to create this form.
    * @param array $form
-   * @param FormStateInterface $formState
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $formState
+   *   The form state object.
    * @param mixed $default
+   *   The default value to use.
    *
    * @return array
-   * The modified form
+   *   The modified form
    */
-   public function createCheckboxElement(string $region, array $form, FormStateInterface $formState, $default) {
+  public function createCheckboxElement(string $region, array $form, FormStateInterface $formState, $default) {
     $def = $this->getDefinition();
     $formRenderArray = [
       '#title' => $this->t($def['title']),
@@ -323,7 +379,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
       $formRenderArray['#attributes'] = ['class' => ['container-inline']];
     }
     $optionId = $this->getOptionId();
-    if ( $region == 'layout') {
+    if ($region == 'layout') {
       $form[$optionId] = $formRenderArray;
     }
     else {
@@ -331,8 +387,9 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     }
     return $form;
   }
+
   /**
-   * Utility function to creates a checkboxes field form element from the option def.
+   * Create a checkboxes field form element from the option def.
    *
    * YAML definition should contain the following settings:
    *     title: 'Option title'
@@ -347,27 +404,31 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
    *     }
    *
    * @param string $region
+   *   The region to create this form.
    * @param array $form
-   * @param FormStateInterface $formState
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $formState
+   *   The form state object.
    * @param mixed $default
+   *   The default value to use.
    *
    * @return array
-   * The modified form
+   *   The modified form
    */
   public function createRadiosElement(string $region, array $form, FormStateInterface $formState, $default) {
     $def = $this->getDefinition();
     $formRenderArray = [
-        '#title' => $this->t($def['title']),
-        '#description' => $this->t($def['description']),
-        '#type' => 'radios',
-        '#options' => $this->translateOptions($def['options']),
-        '#default_value' => $default,
+      '#title' => $this->t($def['title']),
+      '#description' => $this->t($def['description']),
+      '#type' => 'radios',
+      '#options' => $this->translateOptions($def['options']),
+      '#default_value' => $default,
     ];
     if ($def['inline']) {
       $formRenderArray['#attributes'] = ['class' => ['container-inline']];
     }
     $optionId = $this->getOptionId();
-    if ( $region == 'layout') {
+    if ($region == 'layout') {
       $form[$optionId] = $formRenderArray;
     }
     else {
@@ -376,13 +437,30 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     return $form;
   }
 
+  /**
+   * Handle adding an attribute to the build render array for this option.
+   *
+   * @param string $attribute
+   *   The attribute to use, e.g. id, class.
+   * @param array $regions
+   *   The regions to be built.
+   * @param array $build
+   *   The build render array.
+   * @param string $region
+   *   The region being processed.
+   * @param mixed $value
+   *   The value to used for the attribute.
+   *
+   * @return array
+   *   The modified build array.
+   */
   public function processAttributeOptionBuild(string $attribute, array $regions, array $build, string $region, $value) {
-    if ( $region == 'layout') {
-      if ( !isset($build['#attributes'])) {
+    if ($region == 'layout') {
+      if (!isset($build['#attributes'])) {
         $build['#attributes'] = [];
       }
       if (is_array($value)) {
-        if ( empty($build['#attributes'][$attribute])) {
+        if (empty($build['#attributes'][$attribute])) {
           $build['#attributes'][$attribute] = $value;
         }
         else {
@@ -394,11 +472,11 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
       }
     }
     elseif (array_key_exists($region, $regions)) {
-      if ( !isset($build[$region]['#attributes'])) {
+      if (!isset($build[$region]['#attributes'])) {
         $build[$region]['#attributes'] = [];
       }
       if (is_array($value)) {
-        if ( empty($build[$region]['#attributes'][$attribute])) {
+        if (empty($build[$region]['#attributes'][$attribute])) {
           $build[$region]['#attributes'][$attribute] = $value;
         }
         else {
@@ -411,6 +489,13 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     }
     return $build;
   }
+
+  /**
+   * Create a translated version of an options array.
+   *
+   * @return string[]
+   *   The translated options array.
+   */
   public function translateOptions($options) {
     $transOptions = [];
     foreach ($options as $key => $label) {
@@ -418,22 +503,33 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     }
     return $transOptions;
   }
+
+  /**
+   * Get the Layout plugin using this option plug's definition.
+   *
+   * @return string[]
+   *   Array with the plugin definition.
+   */
   public function getLayoutDefinition() {
     return $this->getLayoutPlugin()->getPluginDefinition();
   }
+
   /**
-   * Converts form values to valid option defaults and makes sure they are plain text..
+   * Converts form values to valid option defaults.
    *
-   * @param mixed $values  The form values to normalize
+   * Also makes sure they are plain text.
+   *
+   * @param mixed $values
+   *   The form values to normalize.
    *
    * @return string|string[]
-   * The normalized / sanitized values.
+   *   The normalized / sanitized values.
    */
   public function getNormalizedValues($values) {
     if (!$values) {
       return $values;
     }
-    if ( is_array($values) ) {
+    if (is_array($values)) {
       $new_values = [];
       foreach ($values as $value) {
         if ($value) {
@@ -446,41 +542,49 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     }
     return $new_values;
   }
+
   /**
    * Utility function to validate CSS identifier(s) entered on forms.
    *
    * @param array $form
-   * @param FormStateInterface $formState
+   *   The form Array.
+   * @param \Drupal\Core\Form\FormStateInterface $formState
+   *   The form state object.
+   * @param bool $multi
+   *   Flag to indicate that multiple space separated values can be specified.
    */
-  public function validateCssIdentifier(array $form, FormStateInterface $formState, bool $multi=FALSE) {
+  public function validateCssIdentifier(array $form, FormStateInterface $formState, bool $multi = FALSE) {
     $optionId = $this->getOptionId();
 
     $regions = array_merge(['layout'], $this->getLayoutDefinition()->getRegionNames());
     foreach ($regions as $region) {
       $value = $this->getFOrmValue($formState, $region, $optionId);
       if ($value && !$this->isValidCssIdentifier($value, $multi)) {
-\Drupal::logger('layout_options')->debug('validateCssIdentifier called - Invalid CSS identifier found.');
+        \Drupal::logger('layout_options')->debug('validateCssIdentifier called - Invalid CSS identifier found.');
         $formState->setErrorByName($optionId, $this->t("Invalid CSS identifier."));
       }
     }
   }
+
   /**
-   * Utility function to check if the value is a valid CSS identifier or a space separated list of CSS identifiers.
+   * Validate CSS identifiers in a single item or list of identifiers.
    *
-   * @param mixed $value The value or array of values to check
-   * @param bool $multi If true, test if a list of space separated valid ids.  Default is false.
+   * @param mixed $value
+   *   The value or array of values to check.
+   * @param bool $multi
+   *   If true, test if a list of space separated valid ids.  Default is false.
    *
-   * @return boolean
-   * True if valid id(s) or False if not.
+   * @return bool
+   *   True if valid id(s) or False if not.
    */
-  public function isValidCssIdentifier($value, bool $multi=FALSE) {
+  public function isValidCssIdentifier($value, bool $multi = FALSE) {
     if ($multi) {
       $ids = preg_split("/\s+/", $value);
     }
     else {
       $ids = [trim($value)];
     }
-    foreach ($ids as $id ) {
+    foreach ($ids as $id) {
       $check = Html::cleanCssIdentifier($id);
       if ($check !== $id) {
         return FALSE;
@@ -488,6 +592,13 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     }
     return TRUE;
   }
+
+  /**
+   * Get the definition attributes used by this plugin.
+   *
+   * @return string[]
+   *   Array with key being the attribute and value the type.
+   */
   public function getDefinitionAttributes() {
     return [
       'title' => 'string',
@@ -498,19 +609,23 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
       'regions' => 'boolean',
     ];
   }
+
   /**
-   * Handle getting a config value from either a ERL form or Layout Builder form.
+   * Handle getting config value from either a ERL form or Layout Builder form.
    *
-   * @param FormStateInterface $formState
+   * @param \Drupal\Core\Form\FormStateInterface $formState
+   *   The form state object.
    * @param string $region
+   *   The region to use.
    * @param string $key
+   *   The option id key.
    *
    * @return mixed
-   * The form value.
+   *   The form value.
    */
   public function getFormValue(FormStateInterface $formState, string $region, string $key) {
     $keyArray = [];
-    if ( $formState->hasValue('layout_settings')) {
+    if ($formState->hasValue('layout_settings')) {
       $keyArray[] = 'layout_settings';
     }
     if ($region !== 'layout') {
@@ -519,4 +634,5 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     $keyArray[] = $key;
     return $formState->getValue($keyArray);
   }
+
 }
