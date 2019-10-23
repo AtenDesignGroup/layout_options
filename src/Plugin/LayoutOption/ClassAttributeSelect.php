@@ -18,7 +18,6 @@ class ClassAttributeSelect extends OptionBase {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function validateFormOption(array &$form, FormStateInterface $formState) {
     $def = $this->getDefinition();
@@ -27,7 +26,6 @@ class ClassAttributeSelect extends OptionBase {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function processFormOption(string $region, array $form, FormStateInterface $formState, $default) {
     return $this->createSelectElement($region, $form, $formState, $default);
@@ -35,7 +33,6 @@ class ClassAttributeSelect extends OptionBase {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function processOptionBuild($regions, $build, $region, $value) {
     return $this->processAttributeOptionBuild('class', $regions, $build, $region, $value);

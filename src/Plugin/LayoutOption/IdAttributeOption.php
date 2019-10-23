@@ -18,7 +18,6 @@ class IdAttributeOption extends OptionBase {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function processFormOption(string $region, array $form, FormStateInterface $formState, $default) {
     return $this->createTextElement($region, $form, $formState, $default);
@@ -26,7 +25,6 @@ class IdAttributeOption extends OptionBase {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function validateFormOption(array &$form, FormStateInterface $formState) {
     $this->validateCssIdentifier($form, $formState, FALSE);
@@ -34,7 +32,6 @@ class IdAttributeOption extends OptionBase {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function processOptionBuild($regions, $build, $region, $value) {
     return $this->processAttributeOptionBuild('id', $regions, $build, $region, $value);

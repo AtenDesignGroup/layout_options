@@ -18,7 +18,6 @@ class ClassAttributeCheckboxes extends OptionBase {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function validateFormOption(array &$form, FormStateInterface $formState) {
     $this->validateCssIdentifier($form, $formState, TRUE);
@@ -26,7 +25,6 @@ class ClassAttributeCheckboxes extends OptionBase {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function processFormOption(string $region, array $form, FormStateInterface $formState, $default) {
     return $this->createCheckboxElement($region, $form, $formState, $default);
@@ -34,7 +32,6 @@ class ClassAttributeCheckboxes extends OptionBase {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function processOptionBuild($regions, $build, $region, $value) {
     return $this->processAttributeOptionBuild('class', $regions, $build, $region, $value);

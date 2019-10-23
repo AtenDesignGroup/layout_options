@@ -17,7 +17,6 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function getLabel() {
     return $this->pluginDefinition['label'];
@@ -25,7 +24,6 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function getDescription() {
     return $this->pluginDefinition['description'];
@@ -33,7 +31,6 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function getDefinition() {
     return $this->getConfiguration()['definition'];
@@ -41,7 +38,6 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function getOptionId() {
     return $this->getConfiguration()['option_id'];
@@ -49,7 +45,6 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function getLayoutPlugin() {
     return $this->getConfiguration()['layout_plugin'];
@@ -57,9 +52,8 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
   /**
    * {@inheritDoc}
-   *
    */
-  public function addDefaults(array $configuration) {
+  public function addDefaults($configuration) {
     $id = $this->getOptionId();
     $def = $this->getDefinition();
     $default = isset($def['default']) ? $def['default'] : '';
@@ -99,7 +93,6 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function buildOption(array $regions, array $build) {
     $optionId = $this->getOptionId();
@@ -117,7 +110,6 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function addOptionFormElement(string $region, array $form, FormStateInterface $formState) {
     $optionId = $this->getOptionId();
@@ -177,7 +169,6 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function submitFormOption(array $configuration, array $form, FormStateInterface $formState) {
     $id = $this->getOptionId();
@@ -199,21 +190,18 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function validateFormOption(array &$form, FormStateInterface $formState) {
   }
 
   /**
    * {@inheritDoc}
-   *
    */
   public function validateOptionDefinition(array $optionDefinition) {
   }
 
   /**
    * {@inheritDoc}
-   *
    */
   public function defaultConfiguration() {
     return [];
@@ -221,7 +209,6 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function getConfiguration() {
     return $this->configuration;
@@ -229,7 +216,6 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
   /**
    * {@inheritDoc}
-   *
    */
   public function setConfiguration(array $configuration) {
     $this->configuration = NestedArray::mergeDeep($this->defaultConfiguration(), $configuration);
