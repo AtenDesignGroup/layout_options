@@ -11,5 +11,5 @@
 		"source" : "http://cgit.drupalcode.org/layout_options"
 	},
 	"license" : "GPL-2.0+",
-	"minimum-stability" : "dev",
+	"minimum-stability" : "dev"
 }
