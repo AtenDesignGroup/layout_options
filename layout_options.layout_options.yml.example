@@ -20,6 +20,7 @@ layout_option_definitions:
     plugin: layout_options_id
     layout: true
     regions: true
+    weight: -100  #optional attribute to set form location.
 
   #
   # This defines a background color option using BS 4 classes.
@@ -41,6 +42,7 @@ layout_option_definitions:
     }
     layout: true
     regions: true
+    weight: -90
 
   #
   # This defines a set of classes defined in a theme to apply to the layout.

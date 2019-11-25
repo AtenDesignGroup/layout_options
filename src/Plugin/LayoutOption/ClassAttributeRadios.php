@@ -37,4 +37,14 @@ class ClassAttributeRadios extends OptionBase {
     return $this->processAttributeOptionBuild('class', $regions, $build, $region, $value);
   }
 
+  /**
+   * {@inheritDoc}
+   * @see \Drupal\layout_options\OptionBase::getDefinitionAttributes()
+   */
+  public function getDefinitionAttributes() {
+    return array_merge(parent::getDefinitionAttributes(), [
+      'inline' => 'boolean',
+      'options' => 'array'
+    ]);
+  }
 }

@@ -12,10 +12,23 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  * The base class for LayoutOption plugins.
  */
 abstract class OptionBase extends PluginBase implements OptionInterface {
-  // TODO: Can this be injected?
   use StringTranslationTrait;
 
   /**
+   * Attribute types used in validation that are skipped.
+   *
+   * @var array Attribute types to skip.
+   */
+  protected $noCheckTypes = ['mixed', 'plugin'];
+
+  /**
+   * Optional attributes
+   *
+   * @var array
+   */
+  protected $optionalAttributes = ['weight'];
+
+/**
    * {@inheritdoc}
    */
   public function getLabel() {
@@ -198,6 +211,28 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
    * {@inheritdoc}
    */
   public function validateOptionDefinition(array $optionDefinition) {
+
+    $problems = '';
+    $attributes = $this->getDefinitionAttributes();
+    foreach ($attributes as $key => $type ) {
+      if ( isset($optionDefinition[$key]) ) {
+        if ( !in_array($type, $this->getNoCheckTypes())) {
+          if ( gettype($optionDefinition[$key]) !== $type ) {
+            if (!empty($problems)) {
+              $problems .= ';';
+            }
+            $problems .= " Attribute {$key}'s value is not {$type} type";
+          }
+        }
+      }
+      elseif (! $this->isOptional($key)) {
+        if (!empty($problems)) {
+          $problems .= ';';
+        }
+        $problems .= " Missing the {$key} attribute";
+      }
+    }
+    return empty($problems) ? NULL : $problems;
   }
 
   /**
@@ -250,6 +285,9 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
       '#type' => 'textfield',
       '#default_value' => !empty($default) ? $default : '',
     ];
+    if ($def['weight']) {
+      $formRenderArray['#weight'] = $def['weight'];
+    }
     $optionId = $this->getOptionId();
     if ($region == 'layout') {
       $form[$optionId] = $formRenderArray;
@@ -301,6 +339,9 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     if ($def['multi']) {
       $formRenderArray['#multiple'] = TRUE;
     }
+    if ($def['weight']) {
+      $formRenderArray['#weight'] = $def['weight'];
+    }
     $optionId = $this->getOptionId();
     if ($region == 'layout') {
       $form[$optionId] = $formRenderArray;
@@ -349,6 +390,9 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     ];
     if ($def['inline']) {
       $formRenderArray['#attributes'] = ['class' => ['container-inline']];
+    }
+    if ($def['weight']) {
+      $formRenderArray['#weight'] = $def['weight'];
     }
     $optionId = $this->getOptionId();
     if ($region == 'layout') {
@@ -399,6 +443,9 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     if ($def['inline']) {
       $formRenderArray['#attributes'] = ['class' => ['container-inline']];
     }
+    if ($def['weight']) {
+      $formRenderArray['#weight'] = $def['weight'];
+    }
     $optionId = $this->getOptionId();
     if ($region == 'layout') {
       $form[$optionId] = $formRenderArray;
@@ -436,7 +483,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
           $build['#attributes'][$attribute] = $value;
         }
         else {
-          $build['#attributes'][$attribute] += $value;
+          $build['#attributes'][$attribute] = array_merge($build['#attributes'][$attribute],$value);
         }
       }
       else {
@@ -452,7 +499,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
           $build[$region]['#attributes'][$attribute] = $value;
         }
         else {
-          $build[$region]['#attributes'][$attribute] += $value;
+          $build[$region]['#attributes'][$attribute] = array_merge($build[$region]['#attributes'][$attribute],$value);
         }
       }
       else {
@@ -566,7 +613,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
   }
 
   /**
-   * Get the definition attributes used by this plugin.
+   * Get the definition attributes needed by this definition type.
    *
    * @return string[]
    *   Array with key being the attribute and value the type.
@@ -579,6 +626,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
       'default' => 'mixed',
       'layout' => 'boolean',
       'regions' => 'boolean',
+      'weight' => 'int',
     ];
   }
 
@@ -606,5 +654,50 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     $keyArray[] = $key;
     return $formState->getValue($keyArray);
   }
+  /**
+   * Check if attribute is an optional attribute.
+   *
+   * @param string $attribute The attribute to check.
+   *
+   * @return boolean
+   * True if attribute is optional, False if not.
+   */
+  public function isOptional(string $attribute) {
+    return in_array($attribute, $this->getOptionalAttributes());
+  }
+  /**
+   * Get the type not to check in validation.
+   *
+   * @return array
+   * Array of types not to check.
+   */
+  public function getNoCheckTypes() {
+    return $this->noCheckTypes;
+  }
 
+  /**
+   * Set the array of validation types that should not be checked.
+   *
+   * @param array $noCheckTypes
+   */
+  public function setNoCheckTypes($noCheckTypes) {
+    $this->noCheckTypes = $noCheckTypes;
+  }
+  /**
+   * Get the array of optional attributes
+   *
+   * @return array
+   */
+  public function getOptionalAttributes() {
+      return $this->optionalAttributes;
+  }
+
+  /**
+   * Set the array of optional attributes.
+   *
+   * @param array $optionalAttributes
+   */
+  public function setOptionalAttributes($optionalAttributes) {
+      $this->optionalAttributes = $optionalAttributes;
+  }
 }

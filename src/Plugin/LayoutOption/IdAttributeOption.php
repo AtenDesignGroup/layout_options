@@ -37,4 +37,11 @@ class IdAttributeOption extends OptionBase {
     return $this->processAttributeOptionBuild('id', $regions, $build, $region, $value);
   }
 
+  /**
+   * {@inheritDoc}
+   * @see \Drupal\layout_options\OptionBase::getDefinitionAttributes()
+   */
+  public function getDefinitionAttributes() {
+    return parent::getDefinitionAttributes();
+  }
 }

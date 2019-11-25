@@ -2,6 +2,7 @@
 
 namespace Drupal\layout_options\Plugin\Layout;
 
+use Drupal\Component\Discovery\DiscoveryException;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Discovery\YamlDiscovery;
 use Drupal\Core\Entity\ContentEntityFormInterface;
@@ -9,11 +10,14 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformStateInterface;
 use Drupal\Core\Layout\LayoutDefault;
 use Drupal\Core\Plugin\PluginFormInterface;
+use Drupal\Core\Utility\Error;
+use Drupal\Core\Messenger\MessengerTrait;
 
 /**
  * Layout Plugin that allows format options to be defined via YAML files.
  */
 class LayoutOptions extends LayoutDefault implements PluginFormInterface {
+  use MessengerTrait;
 
   /**
    * The YAML discovery class to find all .layout_options.yml files.
@@ -231,7 +235,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
    * Gets all the layout option definitions.
    *
    * @return string[]
-   *   The layout option  definitions keyed by option id or an empty array
+   *   The layout option definitions keyed by option id or an empty array
    *   if not found.
    */
   public function getLayoutDefinitions() {
@@ -266,13 +270,43 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
    */
   public function getLayoutOptionsSchema() {
     if (!isset($this->layoutOptionsSchema)) {
-      $results = $this->getYamlDiscovery()->findAll();
-      $this->layoutOptionsSchema = [];
-      foreach ($results as $config) {
-        $this->layoutOptionsSchema = NestedArray::mergeDeep($this->layoutOptionsSchema, $config);
+      try {
+        $results = $this->getYamlDiscovery()->findAll();
       }
+      catch (DiscoveryException $e )  {
+        $this->messenger()->addError($this->t('Error reading layout_options.yml files.  See watchdog log for details'));
+        $variables = Error::decodeException($e);
+        \Drupal::logger('layout_options')->error('%type: @message in %function (line %line of %file).', $variables);
+        return [];
+      }
+
+      $layoutOptionsSchema = [];
+      foreach ($results as $config) {
+        $layoutOptionsSchema = NestedArray::mergeDeep($layoutOptionsSchema, $config);
+      }
+      // Warnings only.
+      $this->validateDefinitions($layoutOptionsSchema);
+      $this->layoutOptionsSchema = $layoutOptionsSchema;
     }
     return $this->layoutOptionsSchema;
+  }
+
+  function validateDefinitions(array $schema) {
+    $hasProblems = FALSE;
+    $definitions = isset($schema['layout_option_definitions']) ? $schema['layout_option_definitions'] : [];
+    foreach ($definitions as $option => $definition ) {
+      $plugin = $this->getOptionPlugin($option, $definition);
+      if ( $plugin == NULL ) {
+        $hasProblems = TRUE;
+        continue;
+      }
+      $problems = $plugin->validateOptionDefinition($definition);
+      if (!empty($problems)) {
+        $hasProblems = TRUE;
+        $this->messenger()->addError($this->t("Layout option definition, '@option', has these problems: @problems", ['@option' => $option, '@problems' => $problems]));
+      }
+    }
+    return $hasProblems;
   }
 
   /**
@@ -310,6 +344,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
   protected function getOptionPlugin(string $optionId, array $optionDefinition) {
     if (!isset($this->optionPlugins[$optionId])) {
       if (!isset($optionDefinition['plugin'])) {
+        $this->messenger->addError(t("Option definition, @option (@title), does not define a plugin id", ['@option' => $optionId, '@title' => isset($optionDefinition['title']) ? $optionDefinition['title'] : '']));
         \Drupal::logger('layout_options')->warning("Option definition, @option (@title), does not define a plugin id", ['@option' => $optionId, '@title' => '' /*$optionDefinition['title']*/]);
         return NULL;
       }
