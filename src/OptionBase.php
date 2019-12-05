@@ -626,7 +626,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
       'default' => 'mixed',
       'layout' => 'boolean',
       'regions' => 'boolean',
-      'weight' => 'int',
+      'weight' => 'integer',
     ];
   }
 
