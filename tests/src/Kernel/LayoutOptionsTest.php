@@ -332,6 +332,11 @@ class LayoutOptionsTest extends KernelTestBase {
       'layout_only' => NULL,
       'layout_class_checkboxes' => NULL,
     ];
+    // Validate that parent methods were called post Ver 8.7)
+    if ($this->getDrupalMajorMinor() > 8.7) {
+      $expectedConfig['label'] = NULL;
+    }
+
     $this->assertEquals($expectedConfig, $results);
   }
 
@@ -392,6 +397,10 @@ class LayoutOptionsTest extends KernelTestBase {
       'layout_only' => NULL,
       'layout_class_checkboxes' => ['checkbox1', 'checkbox2'],
     ];
+    // Validate that parent methods were called post Ver 8.7)
+    if ($this->getDrupalMajorMinor() > 8.7) {
+      $expectedSettings['label'] = NULL;
+    }
     $this->assertEquals($expectedSettings, $results['#settings'], "Setting did not match");
 
     $expectedTopAttributes = [
@@ -409,6 +418,17 @@ class LayoutOptionsTest extends KernelTestBase {
       'id' => ['test-right-id'],
     ];
     $this->assertEquals($expectedRightAttributes, $results['right']['#attributes']);
+  }
+
+  /**
+   * Returns the Drupal major and minor version as a float (e.g. 8.8, 8.7, etc).
+   *
+   * @return float
+   *   The Major.Minor parts of the Drupal Version.
+   */
+  public function getDrupalMajorMinor() {
+    $parts = explode('.', \Drupal::VERSION);
+    return $parts[0] * 1.0 + $parts[1] * 0.1;
   }
 
 }
