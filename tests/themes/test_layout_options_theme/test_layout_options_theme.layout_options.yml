@@ -1,0 +1,95 @@
+
+#
+# This section defines the options that are available to configure layouts
+#
+layout_option_definitions:
+  #
+  # This is a theme defined option
+  #
+  layout_id_theme:
+    title: 'Theme Id attribute'
+    description: 'The CSS identifier to use on this layout item.'
+    default: ''
+    plugin: layout_options_id
+    layout: true
+    regions: true
+    weight: -100  #optional attribute to set form location.
+
+# Design classes
+  layout_class_checkboxes:
+    title: 'Multi Select Classes'
+    description: 'Test if multi class selection works'
+    default: ''
+    plugin: 'layout_options_class_checkboxes'
+    inline: true
+    options:
+      class1: 'Class 1'
+      class2: 'Class 2'
+      class3: 'Class 3'
+      class4: 'Class 4'
+    layout: true
+    regions: true
+  #
+  # Override the module version by changing title and adding new option.
+  #
+  layout_bg_color:
+    title: 'Theme Background color'
+    description: 'The background color to use with this layout item.'
+    default: ''
+    plugin: layout_options_class_select
+    multi: false
+    options: { 
+      bg-info: 'Info', 
+      bg-primary: 'Primary', 
+      bg-secondary: 'Secondary', 
+      bg-success: 'Success', 
+      bg-white: White, 
+      bg-transparent: Transparent,
+      bg-theme: Theme 
+    }
+    layout: true
+    regions: true
+    weight: -90
+ 
+  regions_only:
+    title: 'Regions only option'
+    description: 'Test for region only options'
+    default: ''
+    plugin: 'layout_options_class_string'
+    layout: false
+    regions: true
+
+  layout_only:
+    title: 'Layout only option'
+    description: 'Test for layout only options'
+    default: ''
+    plugin: 'layout_options_class_string'
+    layout: true
+    regions: false
+
+#
+# This section of the yaml file defines the "rules" used to determine which options are shown.
+# It can also be used to override the settings defined in the definition area.
+#
+layout_options:
+
+  #
+  # Options in the global section appears on all layout configurations unless overridden
+  #
+  global:
+    # Theme specific option
+    layout_id_theme: {}
+    
+    # Disable module layout id
+    layout_id: 
+      layout: FALSE
+      regions: FALSE
+
+    # Always show the layout_bg_color option.
+    layout_bg_color: {}
+
+    layout_class_checkboxes: {}
+
+    regions_only: {}
+
+    layout_only: {}
