@@ -40,12 +40,14 @@ class ClassAttributeSelect extends OptionBase {
 
   /**
    * {@inheritDoc}
+   *
    * @see \Drupal\layout_options\OptionBase::getDefinitionAttributes()
    */
   public function getDefinitionAttributes() {
     return array_merge(parent::getDefinitionAttributes(), [
       'multi' => 'boolean',
-      'options' => 'array'
+      'options' => 'array',
     ]);
   }
+
 }

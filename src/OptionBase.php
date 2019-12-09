@@ -17,18 +17,18 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
   /**
    * Attribute types used in validation that are skipped.
    *
-   * @var array Attribute types to skip.
+   * @var array
    */
   protected $noCheckTypes = ['mixed', 'plugin'];
 
   /**
-   * Optional attributes
+   * Optional attributes.
    *
    * @var array
    */
   protected $optionalAttributes = ['weight'];
 
-/**
+  /**
    * {@inheritdoc}
    */
   public function getLabel() {
@@ -112,7 +112,9 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     $layoutRegions = array_merge(['layout'], $this->getLayoutDefinition()->getRegionNames());
     $configuration = $this->getLayoutPlugin()->getConfiguration();
     // Make the top level layout area look like a region.
-    $configuration['layout'][$optionId] = $configuration[$optionId];
+    if (isset($configuration[$optionId])) {
+      $configuration['layout'][$optionId] = $configuration[$optionId];
+    }
     foreach ($layoutRegions as $region) {
       if ($this->isAllowed($region)  && !empty($configuration[$region][$optionId])) {
         $build = $this->processOptionBuild($regions, $build, $region, $configuration[$region][$optionId]);
@@ -214,10 +216,10 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
     $problems = '';
     $attributes = $this->getDefinitionAttributes();
-    foreach ($attributes as $key => $type ) {
-      if ( isset($optionDefinition[$key]) ) {
-        if ( !in_array($type, $this->getNoCheckTypes())) {
-          if ( gettype($optionDefinition[$key]) !== $type ) {
+    foreach ($attributes as $key => $type) {
+      if (isset($optionDefinition[$key])) {
+        if (!in_array($type, $this->getNoCheckTypes())) {
+          if (gettype($optionDefinition[$key]) !== $type) {
             if (!empty($problems)) {
               $problems .= ';';
             }
@@ -225,7 +227,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
           }
         }
       }
-      elseif (! $this->isOptional($key)) {
+      elseif (!$this->isOptional($key)) {
         if (!empty($problems)) {
           $problems .= ';';
         }
@@ -285,7 +287,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
       '#type' => 'textfield',
       '#default_value' => !empty($default) ? $default : '',
     ];
-    if ($def['weight']) {
+    if (isset($def['weight'])) {
       $formRenderArray['#weight'] = $def['weight'];
     }
     $optionId = $this->getOptionId();
@@ -339,7 +341,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     if ($def['multi']) {
       $formRenderArray['#multiple'] = TRUE;
     }
-    if ($def['weight']) {
+    if (isset($def['weight'])) {
       $formRenderArray['#weight'] = $def['weight'];
     }
     $optionId = $this->getOptionId();
@@ -391,7 +393,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     if ($def['inline']) {
       $formRenderArray['#attributes'] = ['class' => ['container-inline']];
     }
-    if ($def['weight']) {
+    if (isset($def['weight'])) {
       $formRenderArray['#weight'] = $def['weight'];
     }
     $optionId = $this->getOptionId();
@@ -443,7 +445,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     if ($def['inline']) {
       $formRenderArray['#attributes'] = ['class' => ['container-inline']];
     }
-    if ($def['weight']) {
+    if (isset($def['weight'])) {
       $formRenderArray['#weight'] = $def['weight'];
     }
     $optionId = $this->getOptionId();
@@ -483,7 +485,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
           $build['#attributes'][$attribute] = $value;
         }
         else {
-          $build['#attributes'][$attribute] = array_merge($build['#attributes'][$attribute],$value);
+          $build['#attributes'][$attribute] = array_merge($build['#attributes'][$attribute], $value);
         }
       }
       else {
@@ -499,7 +501,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
           $build[$region]['#attributes'][$attribute] = $value;
         }
         else {
-          $build[$region]['#attributes'][$attribute] = array_merge($build[$region]['#attributes'][$attribute],$value);
+          $build[$region]['#attributes'][$attribute] = array_merge($build[$region]['#attributes'][$attribute], $value);
         }
       }
       else {
@@ -654,22 +656,25 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     $keyArray[] = $key;
     return $formState->getValue($keyArray);
   }
+
   /**
    * Check if attribute is an optional attribute.
    *
-   * @param string $attribute The attribute to check.
+   * @param string $attribute
+   *   The attribute to check.
    *
-   * @return boolean
-   * True if attribute is optional, False if not.
+   * @return bool
+   *   True if attribute is optional, False if not.
    */
   public function isOptional(string $attribute) {
     return in_array($attribute, $this->getOptionalAttributes());
   }
+
   /**
    * Get the type not to check in validation.
    *
    * @return array
-   * Array of types not to check.
+   *   Array of types not to check.
    */
   public function getNoCheckTypes() {
     return $this->noCheckTypes;
@@ -679,25 +684,30 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
    * Set the array of validation types that should not be checked.
    *
    * @param array $noCheckTypes
+   *   Array of validation types.
    */
-  public function setNoCheckTypes($noCheckTypes) {
+  public function setNoCheckTypes(array $noCheckTypes) {
     $this->noCheckTypes = $noCheckTypes;
   }
+
   /**
-   * Get the array of optional attributes
+   * Get the array of optional attributes.
    *
    * @return array
+   *   array of optional attributes
    */
   public function getOptionalAttributes() {
-      return $this->optionalAttributes;
+    return $this->optionalAttributes;
   }
 
   /**
    * Set the array of optional attributes.
    *
    * @param array $optionalAttributes
+   *   Array of optional attributes.
    */
-  public function setOptionalAttributes($optionalAttributes) {
-      $this->optionalAttributes = $optionalAttributes;
+  public function setOptionalAttributes(array $optionalAttributes) {
+    $this->optionalAttributes = $optionalAttributes;
   }
+
 }

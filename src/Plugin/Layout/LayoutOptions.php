@@ -12,6 +12,7 @@ use Drupal\Core\Layout\LayoutDefault;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Utility\Error;
 use Drupal\Core\Messenger\MessengerTrait;
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 
 /**
  * Layout Plugin that allows format options to be defined via YAML files.
@@ -63,7 +64,6 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
    * {@inheritdoc}
    */
   public function build(array $regions) {
-    // ksm($this->getPluginDefinition()->id());
     $configuration = $this->getConfiguration();
     $field = isset($configuration['field_name']) ? $configuration['field_name'] : NULL;
     $build = parent::build($regions);
@@ -147,7 +147,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $formState) {
-    if ( method_exists(get_parent_class($this), "validateConfigurationForm")) {
+    if (method_exists(get_parent_class($this), "validateConfigurationForm")) {
       parent::validateConfigurationForm($form, $formState);
     }
     if ($formState instanceof SubformStateInterface) {
@@ -282,7 +282,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
       try {
         $results = $this->getYamlDiscovery()->findAll();
       }
-      catch (DiscoveryException $e )  {
+      catch (DiscoveryException $e) {
         $this->messenger()->addError($this->t('Error reading layout_options.yml files.  See watchdog log for details'));
         $variables = Error::decodeException($e);
         \Drupal::logger('layout_options')->error('%type: @message in %function (line %line of %file).', $variables);
@@ -300,13 +300,23 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
     return $this->layoutOptionsSchema;
   }
 
-  function validateDefinitions(array $schema) {
+  /**
+   * Validate the layout option definitions returned via Discovery.
+   *
+   * @param array $schema
+   *   The schema to validate.
+   *
+   * @return bool
+   *   Return true if valid / false if not
+   */
+  public function validateDefinitions(array $schema) {
     $hasProblems = FALSE;
     $definitions = isset($schema['layout_option_definitions']) ? $schema['layout_option_definitions'] : [];
-    foreach ($definitions as $option => $definition ) {
+    foreach ($definitions as $option => $definition) {
       $plugin = $this->getOptionPlugin($option, $definition);
-      if ( $plugin == NULL ) {
+      if ($plugin == NULL) {
         $hasProblems = TRUE;
+        $this->messenger()->addError($this->t("Layout option definition, '@option', has an invalid plugin id", ['@option' => $option]));
         continue;
       }
       $problems = $plugin->validateOptionDefinition($definition);
@@ -315,7 +325,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
         $this->messenger()->addError($this->t("Layout option definition, '@option', has these problems: @problems", ['@option' => $option, '@problems' => $problems]));
       }
     }
-    return $hasProblems;
+    return !$hasProblems;
   }
 
   /**
@@ -324,7 +334,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
    * @return \Drupal\Core\Discovery\YamlDiscovery
    *   The YAML discovery object.
    */
-  protected function getYamlDiscovery() {
+  public function getYamlDiscovery() {
     if (!isset($this->yamlDiscovery)) {
       $moduleHandler = \Drupal::service('module_handler');
       $themeHandler = \Drupal::service('theme_handler');
@@ -346,12 +356,14 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
    *   The definition option id.
    * @param string[] $optionDefinition
    *   The array that defines this option's definition.
+   * @param bool $bypassCache
+   *   Option to allow bypassing cached plugin info.
    *
    * @return \Drupal\layout_options\OptionInterface|null
    *   The plugin or NULL in not found.
    */
-  protected function getOptionPlugin(string $optionId, array $optionDefinition) {
-    if (!isset($this->optionPlugins[$optionId])) {
+  public function getOptionPlugin(string $optionId, array $optionDefinition, bool $bypassCache = FALSE) {
+    if (!isset($this->optionPlugins[$optionId]) || $bypassCache) {
       if (!isset($optionDefinition['plugin'])) {
         $this->messenger->addError(t("Option definition, @option (@title), does not define a plugin id", ['@option' => $optionId, '@title' => isset($optionDefinition['title']) ? $optionDefinition['title'] : '']));
         \Drupal::logger('layout_options')->warning("Option definition, @option (@title), does not define a plugin id", ['@option' => $optionId, '@title' => '' /*$optionDefinition['title']*/]);
@@ -364,7 +376,15 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
         'definition' => $optionDefinition,
         'layout_plugin' => $this,
       ];
-      $plugin = $manager->createInstance($plugin_id, $conf);
+      try {
+        $plugin = $manager->createInstance($plugin_id, $conf);
+      }
+      catch (PluginNotFoundException $e) {
+        $this->messenger()->addError($this->t('Plugin, "%plugin", not found.  See watchdog log for details', ['%plugin' => $plugin_id]));
+        $variables = Error::decodeException($e);
+        \Drupal::logger('layout_options')->error('%type: @message in %function (line %line of %file).', $variables);
+        return NULL;
+      }
       $this->optionPlugins[$optionId] = $plugin;
     }
     $plugin = $this->optionPlugins[$optionId];
@@ -373,6 +393,13 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
     $configuration['definition'] = $optionDefinition;
     $plugin->setConfiguration($configuration);
     return $plugin;
+  }
+
+  /**
+   * Clears the plugin cache and forces getOptionPlugin to reload plugins.
+   */
+  public function clearPluginCache() {
+    $this->optionPlugins = [];
   }
 
 }
