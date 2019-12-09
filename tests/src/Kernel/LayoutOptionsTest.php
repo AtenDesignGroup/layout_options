@@ -11,7 +11,7 @@ use Drupal\layout_options\Plugin\Layout\LayoutOptions;
  * Tests LayouOptions layout plugin functionality.
  *
  * @coversDefaultClass \Drupal\layout_options\Plugin\Layout\LayoutOptions
-
+ *
  * @group layout_options
  */
 class LayoutOptionsTest extends KernelTestBase {
@@ -266,7 +266,7 @@ class LayoutOptionsTest extends KernelTestBase {
     $results = $layoutPlugin->processConfigurationForm($form, $formState);
     $expectedTopKeys = [
       'layout_only', 'layout_class_checkboxes', 'layout_id_theme',
-      'layout_bg_color', 'left', 'right'
+      'layout_bg_color', 'left', 'right',
     ];
     $this->assertEquals($expectedTopKeys, array_keys($results), "Expected top keys not found.");
 
