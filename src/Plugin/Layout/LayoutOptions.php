@@ -89,7 +89,10 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
    * third party widget settings, using #process would be unnecessary.
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['#process'] = [[$this, 'processConfigurationForm']];
+    if (method_exists(get_parent_class($this), 'buildConfigurationForm')) {
+      $form = parent::buildConfigurationForm($form, $form_state);
+    }
+    $form['#process'][] = [$this, 'processConfigurationForm'];
     return $form;
   }
 
@@ -144,6 +147,9 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $formState) {
+    if ( method_exists(get_parent_class($this), "validateConfigurationForm")) {
+      parent::validateConfigurationForm($form, $formState);
+    }
     if ($formState instanceof SubformStateInterface) {
       $compFormState = $formState->getCompleteFormState();
     }
@@ -164,6 +170,9 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $formState) {
+    if (method_exists(get_parent_class($this), 'submitConfigurationForm')) {
+      parent::submitConfigurationForm($form, $formState);
+    }
     $configuration = $this->getConfiguration();
 
     $field = NULL;
