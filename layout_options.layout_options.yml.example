@@ -100,8 +100,8 @@ layout_options:
     # Only allow bg color option on main layout area and not in the regions.
     # 
     layout_bg_color:
-      regions: false;
-      layout: true;
+      regions: false
+      layout: true
 
     #
     # Use the design classes option
@@ -125,4 +125,3 @@ layout_options:
       
     # Add the custom classes option
     layout_custom_classes: {}
-
