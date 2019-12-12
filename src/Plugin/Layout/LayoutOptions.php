@@ -9,16 +9,44 @@ use Drupal\Core\Entity\ContentEntityFormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformStateInterface;
 use Drupal\Core\Layout\LayoutDefault;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Utility\Error;
 use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Core\Logger\LoggerChannelTrait;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Extension\ThemeHandlerInterface;
+use Drupal\layout_options\LayoutOptionPluginManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Layout Plugin that allows format options to be defined via YAML files.
  */
-class LayoutOptions extends LayoutDefault implements PluginFormInterface {
+class LayoutOptions extends LayoutDefault implements PluginFormInterface, ContainerFactoryPluginInterface {
   use MessengerTrait;
+  use LoggerChannelTrait;
+
+  /**
+   * The module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * The theme handler service.
+   *
+   * @var \Drupal\Core\Extension\ThemeHandlerInterface
+   */
+  protected $themeHandler;
+
+  /**
+   * The LayoutOptionPlugin service.
+   *
+   * @var \Drupal\layout_options\LayoutOptionPluginManager
+   */
+  protected $layoutOptionManager;
 
   /**
    * The YAML discovery class to find all .layout_options.yml files.
@@ -40,6 +68,65 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
    * @var \Drupal\layout_options\OptionInterface[]
    */
   protected $optionPlugins = [];
+
+  /**
+   * Constructs a LayoutOptions layout plugin object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   The module handler object.
+   * @param \Drupal\Core\Extension\ThemeHandlerInterface $themeHandler
+   *   The theme handler object.
+   * @param \Drupal\layout_options\LayoutOptionPluginManager $layoutOptionManager
+   *   The theme handler object.
+   */
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    ModuleHandlerInterface $moduleHandler,
+    ThemeHandlerInterface $themeHandler,
+    LayoutOptionPluginManager $layoutOptionManager
+  ) {
+    $this->moduleHandler = $moduleHandler;
+    $this->themeHandler = $themeHandler;
+    $this->layoutOptionManager = $layoutOptionManager;
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  }
+
+  /**
+   * Handle plugin injection.
+   *
+   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+   *   The container.
+   * @param array $configuration
+   *   The configuration array.
+   * @param string $plugin_id
+   *   The plugin id.
+   * @param mixed $plugin_definition
+   *   The plugin definition.
+   *
+   * @return \Drupal\layout_options\Plugin\Layout\LayoutOptions
+   *   An initialized LayoutOptions object.
+   */
+  public static function create(ContainerInterface $container,
+      array $configuration,
+  $plugin_id,
+  $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('module_handler'),
+      $container->get('theme_handler'),
+      $container->get('plugin.manager.layout_options')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -150,11 +237,12 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
     if (method_exists(get_parent_class($this), "validateConfigurationForm")) {
       parent::validateConfigurationForm($form, $formState);
     }
+    $field = NULL;
     if ($formState instanceof SubformStateInterface) {
       $compFormState = $formState->getCompleteFormState();
+      $field = $compFormState->getValue('field_name');
     }
 
-    $field = $compFormState->getValue('field_name');
     $options = $this->parseLayoutOptions($this->getPluginDefinition()->id(), $field);
     $keys = array_keys($options);
     foreach ($keys as $optionId) {
@@ -285,7 +373,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
       catch (DiscoveryException $e) {
         $this->messenger()->addError($this->t('Error reading layout_options.yml files.  See watchdog log for details'));
         $variables = Error::decodeException($e);
-        \Drupal::logger('layout_options')->error('%type: @message in %function (line %line of %file).', $variables);
+        $this->getLogger('layout_options')->error('%type: @message in %function (line %line of %file).', $variables);
         return [];
       }
 
@@ -336,11 +424,10 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
    */
   public function getYamlDiscovery() {
     if (!isset($this->yamlDiscovery)) {
-      $moduleHandler = \Drupal::service('module_handler');
-      $themeHandler = \Drupal::service('theme_handler');
       $this->yamlDiscovery = new YamlDiscovery(
         'layout_options',
-        $moduleHandler->getModuleDirectories() + $themeHandler->getThemeDirectories()
+        $this->moduleHandler->getModuleDirectories() +
+        $this->themeHandler->getThemeDirectories()
       );
     }
     return $this->yamlDiscovery;
@@ -366,23 +453,22 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface {
     if (!isset($this->optionPlugins[$optionId]) || $bypassCache) {
       if (!isset($optionDefinition['plugin'])) {
         $this->messenger->addError(t("Option definition, @option (@title), does not define a plugin id", ['@option' => $optionId, '@title' => isset($optionDefinition['title']) ? $optionDefinition['title'] : '']));
-        \Drupal::logger('layout_options')->warning("Option definition, @option (@title), does not define a plugin id", ['@option' => $optionId, '@title' => '' /*$optionDefinition['title']*/]);
+        $this->getLogger('layout_options')->warning("Option definition, @option (@title), does not define a plugin id", ['@option' => $optionId, '@title' => '' /*$optionDefinition['title']*/]);
         return NULL;
       }
       $plugin_id = $optionDefinition['plugin'];
-      $manager = \Drupal::service('plugin.manager.layout_options');
       $conf = [
         'option_id' => $optionId,
         'definition' => $optionDefinition,
         'layout_plugin' => $this,
       ];
       try {
-        $plugin = $manager->createInstance($plugin_id, $conf);
+        $plugin = $this->layoutOptionManager->createInstance($plugin_id, $conf);
       }
       catch (PluginNotFoundException $e) {
         $this->messenger()->addError($this->t('Plugin, "%plugin", not found.  See watchdog log for details', ['%plugin' => $plugin_id]));
         $variables = Error::decodeException($e);
-        \Drupal::logger('layout_options')->error('%type: @message in %function (line %line of %file).', $variables);
+        $this->getLogger('layout_options')->error('%type: @message in %function (line %line of %file).', $variables);
         return NULL;
       }
       $this->optionPlugins[$optionId] = $plugin;

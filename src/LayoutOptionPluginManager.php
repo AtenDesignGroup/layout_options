@@ -46,7 +46,7 @@ class LayoutOptionPluginManager extends DefaultPluginManager {
     );
 
     $this->alterInfo('layout_option_info');
-    $this->setCacheBackend($cache_backend, 'layout_options_plugins');
+    $this->setCacheBackend($cache_backend, 'layout_options_plugins', []);
   }
 
 }

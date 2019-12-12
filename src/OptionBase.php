@@ -581,7 +581,6 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     foreach ($regions as $region) {
       $value = $this->getFOrmValue($formState, $region, $optionId);
       if ($value && !$this->isValidCssIdentifier($value, $multi)) {
-        \Drupal::logger('layout_options')->debug('validateCssIdentifier called - Invalid CSS identifier found.');
         $formState->setErrorByName($optionId, $this->t("Invalid CSS identifier."));
       }
     }

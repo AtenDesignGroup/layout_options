@@ -139,7 +139,14 @@ class LayoutOptionsTest extends KernelTestBase {
         ],
       ]);
     }
-    return new LayoutOptions($configuration, '', $definition);
+    return new LayoutOptions(
+      $configuration,
+      '',
+      $definition,
+      $this->container->get('module_handler'),
+      $this->container->get('theme_handler'),
+      $this->container->get('plugin.manager.layout_options')
+    );
   }
 
   /**
@@ -392,7 +399,6 @@ class LayoutOptionsTest extends KernelTestBase {
         'layout_class_checkboxes' => NULL,
       ],
       'layout_bg_color' => 'bg-info',
-      'layout_id' => '',
       'layout_id' => NULL,
       'layout_only' => NULL,
       'layout_class_checkboxes' => ['checkbox1', 'checkbox2'],
