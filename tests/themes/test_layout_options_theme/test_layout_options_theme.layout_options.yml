@@ -38,15 +38,14 @@ layout_option_definitions:
     default: ''
     plugin: layout_options_class_select
     multi: false
-    options: { 
-      bg-info: 'Info', 
-      bg-primary: 'Primary', 
-      bg-secondary: 'Secondary', 
-      bg-success: 'Success', 
-      bg-white: White, 
-      bg-transparent: Transparent,
-      bg-theme: Theme 
-    }
+    options:
+      bg-info: 'Info'
+      bg-primary: 'Primary'
+      bg-secondary: 'Secondary'
+      bg-success: 'Success'
+      bg-white: 'White'
+      bg-transparent: 'Transparent'
+      bg-theme: 'Theme'
     layout: true
     regions: true
     weight: -90

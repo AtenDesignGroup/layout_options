@@ -96,14 +96,13 @@ information like this:
         # A plugin that handles select form based class attributes.
         plugin: layout_options_class_select  
         multi: false  #select multiple options?
-        options: {   # The select options shown
-          bg-info: 'Info', 
-          bg-primary: 'Primary', 
-          bg-secondary: 'Secondary', 
-          bg-success: 'Success', 
-          bg-white: 'White', 
-          bg-transparent: 'Transparent' 
-        }
+        options:  # The select options shown
+          bg-info: 'Info'
+          bg-primary: 'Primary'
+          bg-secondary: 'Secondary'
+          bg-success: 'Success'
+          bg-white: 'White'
+          bg-transparent: 'Transparent'
         layout: true  # allow option to be used in the overall layout container
         regions: true # allow this option to be used in any regions
 
