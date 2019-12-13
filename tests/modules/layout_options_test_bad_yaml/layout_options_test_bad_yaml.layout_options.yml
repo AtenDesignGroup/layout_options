@@ -1,0 +1,15 @@
+#
+# This is a badly formatted yaml file used to test error handling.
+#
+# This section defines the options that are available to configure layouts
+#
+layout_option_definitions:
+  bad_option:
+    title 'Id attribute'  #missing :"
+    description: 'This element will fail" #Miss matching quotes.
+    default: ''
+    plugin: layout_options_id
+    layout: true
+    regions: true
+    weight: -100  #optional attribute to set form location.
+

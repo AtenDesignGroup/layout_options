@@ -2,23 +2,23 @@
 
 namespace Drupal\layout_options\Plugin\Layout;
 
-use Drupal\Component\Discovery\DiscoveryException;
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Discovery\YamlDiscovery;
 use Drupal\Core\Entity\ContentEntityFormInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformStateInterface;
 use Drupal\Core\Layout\LayoutDefault;
+use Drupal\Core\Logger\LoggerChannelTrait;
+use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Utility\Error;
-use Drupal\Core\Messenger\MessengerTrait;
-use Drupal\Component\Plugin\Exception\PluginNotFoundException;
-use Drupal\Core\Logger\LoggerChannelTrait;
-use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\layout_options\LayoutOptionPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Exception;
 
 /**
  * Layout Plugin that allows format options to be defined via YAML files.
@@ -370,7 +370,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface, Contai
       try {
         $results = $this->getYamlDiscovery()->findAll();
       }
-      catch (DiscoveryException $e) {
+      catch (Exception $e) {
         $this->messenger()->addError($this->t('Error reading layout_options.yml files.  See watchdog log for details'));
         $variables = Error::decodeException($e);
         $this->getLogger('layout_options')->error('%type: @message in %function (line %line of %file).', $variables);

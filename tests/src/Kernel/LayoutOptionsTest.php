@@ -119,6 +119,10 @@ class LayoutOptionsTest extends KernelTestBase {
 
     $this->container->get('theme_installer')->install(['test_layout_options_theme']);
     $this->config('system.theme')->set('default', 'test_layout_options_theme')->save();
+
+    if ($this->getName() == 'testGetLayoutOptionsSchemaBadYamlFile') {
+      $this->container->get('module_installer')->install(['layout_options_test_bad_yaml']);
+    }
   }
 
   /**
@@ -159,6 +163,19 @@ class LayoutOptionsTest extends KernelTestBase {
     $this->assertArrayHasKey('layout_options_test', $results, "Found module options");
     $this->assertArrayHasKey('layout_option_definitions', $results['test_layout_options_theme'], "Theme options have definitions");
     $this->assertArrayHasKey('layout_option_definitions', $results['layout_options_test'], "Module options have definitions");
+  }
+
+  /**
+   * @covers ::getLayoutOptionsSchema
+   *
+   * Note: Uses test specific setup / teardown
+   */
+  public function testGetLayoutOptionsSchemaBadYamlFile() {
+    $layoutPlugin = $this->getLayoutOptionsPlugin();
+    $results = $layoutPlugin->getLayoutOptionsSchema();
+    $this->assertEmpty($results, "Check if schema is empty");
+    $errors = $layoutPlugin->messenger()->messagesByType($layoutPlugin->messenger()::TYPE_ERROR);
+    $this->assertNotEmpty($errors, "Checking that error messages created");
   }
 
   /**

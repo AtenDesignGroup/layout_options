@@ -1,0 +1,6 @@
+name: 'Layout Options test Bad Yaml'
+type: module
+description: 'Support module for testing layout options handling of yaml syntax errors.'
+package: Testing
+version: VERSION
+core: 8.x
