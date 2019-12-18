@@ -92,3 +92,8 @@ layout_options:
     regions_only: {}
 
     layout_only: {}
+
+  layout_only_in_regions:
+
+    layout_only:
+      regions: true

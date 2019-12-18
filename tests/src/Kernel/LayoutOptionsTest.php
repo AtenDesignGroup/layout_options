@@ -3,8 +3,8 @@
 namespace Drupal\Tests\layout_options\Kernel;
 
 use Drupal\Core\Form\FormState;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\Core\Layout\LayoutDefinition;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\layout_options\Plugin\Layout\LayoutOptions;
 
 /**
@@ -127,8 +127,18 @@ class LayoutOptionsTest extends KernelTestBase {
 
   /**
    * Create a layoutOptionPlugin object to use in testing.
+   *
+   * @param string $layoutId
+   *   The layout id to use.
+   * @param array $configuration
+   *   The configuration used by the plugin.
+   * @param \Drupal\Core\Layout\LayoutDefinition $definition
+   *   The layout Definition.
+   *
+   * @return \Drupal\layout_options\Plugin\Layout\LayoutOptions
+   *   A new initialized LayoutOptions object.
    */
-  protected function getLayoutOptionsPlugin(array $configuration = [], LayoutDefinition $definition = NULL) {
+  protected function getLayoutOptionsPlugin(string $layoutId = "test_50_50", array $configuration = [], LayoutDefinition $definition = NULL) {
     if ($definition === NULL) {
       $definition = new LayoutDefinition([
         'theme_hook' => 'layout',
@@ -143,6 +153,7 @@ class LayoutOptionsTest extends KernelTestBase {
         ],
       ]);
     }
+    $definition->set('id', $layoutId);
     return new LayoutOptions(
       $configuration,
       '',
@@ -168,7 +179,7 @@ class LayoutOptionsTest extends KernelTestBase {
   /**
    * @covers ::getLayoutOptionsSchema
    *
-   * Note: Uses test specific setup / teardown
+   * Note: Uses test specific setup
    */
   public function testGetLayoutOptionsSchemaBadYamlFile() {
     $layoutPlugin = $this->getLayoutOptionsPlugin();
@@ -220,6 +231,9 @@ class LayoutOptionsTest extends KernelTestBase {
     $this->assertSame($expected, $keys, "Did not find all layout options.");
     $this->assertFalse($results['layout_bg_color']['regions'], "Module layout override didn't work.");
     $this->assertFalse($results['layout_id']['layout'], "Theme global override didn't work.");
+
+    $results = $layoutPlugin->parseLayoutOptions('layout_only_in_regions');
+    $this->assertTrue($results['layout_only']['regions'], "Test if regions can be toggled.");
   }
 
   /**
@@ -239,6 +253,14 @@ class LayoutOptionsTest extends KernelTestBase {
     ];
     $results = $layoutPlugin->getOptionPlugin($optionId, $optionDefinition);
     $this->assertNotNull($results, "Did not find layout option plugin");
+    $this->assertEquals($optionDefinition, $results->getDefinition(), "Plugin definition match test");
+
+    // Test that plug definitions changed when using cached version.
+    $optionDefinitionModified = $optionDefinition;
+    $optionDefinitionModified['layout'] = FALSE;
+    $results = $layoutPlugin->getOptionPlugin($optionId, $optionDefinitionModified);
+    $this->assertNotNull($results, "Did not find layout option plugin");
+    $this->assertEquals($optionDefinitionModified, $results->getDefinition(), "Plugin definitin match test");
 
     $optionDefinitionBadPlugin = $optionDefinition;
     $optionDefinitionBadPlugin['plugin'] = "bad_plugin_id";
@@ -312,6 +334,39 @@ class LayoutOptionsTest extends KernelTestBase {
   }
 
   /**
+   * @covers ::processConfigurationForm
+   */
+  public function testProcessConfigurationFormAltLayout() {
+    $form = [];
+    $formState = new FormState();
+    $formState->addBuildInfo('callback_object', new \stdClass());
+    $layoutPlugin = $this->getLayoutOptionsPlugin('layout_only_in_regions');
+
+    $results = $layoutPlugin->processConfigurationForm($form, $formState);
+    $expectedTopKeys = [
+      'layout_only', 'layout_class_checkboxes', 'layout_id_theme',
+      'layout_bg_color', 'left', 'right',
+    ];
+    $this->assertEquals($expectedTopKeys, array_keys($results), "Expected top keys not found.");
+
+    $expectedLeftKeys = [
+      '#type', '#title', 'layout_only', 'regions_only', 'layout_class_checkboxes', 'layout_id_theme', 'layout_bg_color',
+    ];
+    $this->assertEquals($expectedLeftKeys, array_keys($results['left']), "Expected left region keys not found.");
+
+    $expectedLeftIdKeys = [
+      '#title', '#description', '#type', '#default_value', '#weight',
+    ];
+    $this->assertEquals($expectedLeftIdKeys, array_keys($results['left']['layout_id_theme']), "Expected left region layout_id_theme form fields not found.");
+
+    // Check that weight not set.
+    $expectedLeftRegionOnlyKeys = [
+      '#title', '#description', '#type', '#default_value',
+    ];
+    $this->assertEquals($expectedLeftRegionOnlyKeys, array_keys($results['left']['layout_only']), "Expected left region layout_only form fields not found.");
+  }
+
+  /**
    * @covers ::submitConfigurationForm
    */
   public function testSubmitConfigurationForm() {
@@ -340,19 +395,69 @@ class LayoutOptionsTest extends KernelTestBase {
       'left' => [
         'layout_id_theme' => 'test-left-id',
         'layout_bg_color' => 'bg-success',
-        'layout_id' => NULL,
         'regions_only' => NULL,
         'layout_class_checkboxes' => NULL,
       ],
       'right' => [
         'layout_id_theme' => 'test-right-id',
         'layout_bg_color' => 'bg-warning',
-        'layout_id' => NULL,
         'regions_only' => NULL,
         'layout_class_checkboxes' => NULL,
       ],
       'layout_bg_color' => 'bg-info',
-      'layout_id' => NULL,
+      'layout_only' => NULL,
+      'layout_class_checkboxes' => NULL,
+    ];
+    // Validate that parent methods were called post Ver 8.7)
+    if ($this->getDrupalMajorMinor() > 8.7) {
+      $expectedConfig['label'] = NULL;
+    }
+
+    $this->assertEquals($expectedConfig, $results);
+  }
+
+  /**
+   * @covers ::submitConfigurationForm
+   */
+  public function testSubmitConfigurationFormAltLayout() {
+    $layoutPlugin = $this->getLayoutOptionsPlugin('layout_only_in_regions');
+    $layoutPlugin->setConfiguration($layoutPlugin->defaultConfiguration());
+    $form = [];
+    $formState = new FormState();
+    $values = [
+      'layout_id_theme' => "test-id",
+      'layout_bg_color' => 'bg-info',
+      'left' => [
+        'layout_id_theme' => 'test-left-id',
+        'layout_bg_color' => 'bg-success',
+        'layout_only' => 'layout-only-left-class',
+      ],
+      'right' => [
+        'layout_id_theme' => 'test-right-id',
+        'layout_bg_color' => 'bg-warning',
+      ],
+    ];
+    $formState->setValues($values);
+    $layoutPlugin->submitConfigurationForm($form, $formState);
+
+    $results = $layoutPlugin->getConfiguration();
+    $expectedConfig = [
+      'layout_id_theme' => 'test-id',
+      'left' => [
+        'layout_id_theme' => 'test-left-id',
+        'layout_bg_color' => 'bg-success',
+        'regions_only' => NULL,
+        'layout_class_checkboxes' => NULL,
+        'layout_only' => 'layout-only-left-class',
+      ],
+      'right' => [
+        'layout_id_theme' => 'test-right-id',
+        'layout_bg_color' => 'bg-warning',
+        'regions_only' => NULL,
+        'layout_class_checkboxes' => NULL,
+        'layout_only' => NULL,
+      ],
+      'layout_bg_color' => 'bg-info',
       'layout_only' => NULL,
       'layout_class_checkboxes' => NULL,
     ];
@@ -404,19 +509,16 @@ class LayoutOptionsTest extends KernelTestBase {
       'left' => [
         'layout_id_theme' => 'test-left-id',
         'layout_bg_color' => NULL,
-        'layout_id' => NULL,
         'regions_only' => NULL,
         'layout_class_checkboxes' => NULL,
       ],
       'right' => [
         'layout_id_theme' => 'test-right-id',
         'layout_bg_color' => NULL,
-        'layout_id' => NULL,
         'regions_only' => NULL,
         'layout_class_checkboxes' => NULL,
       ],
       'layout_bg_color' => 'bg-info',
-      'layout_id' => NULL,
       'layout_only' => NULL,
       'layout_class_checkboxes' => ['checkbox1', 'checkbox2'],
     ];
@@ -434,6 +536,83 @@ class LayoutOptionsTest extends KernelTestBase {
 
     $expectedLeftAttributes = [
       'id' => ['test-left-id'],
+    ];
+    $this->assertEquals($expectedLeftAttributes, $results['left']['#attributes']);
+
+    $expectedRightAttributes = [
+      'id' => ['test-right-id'],
+    ];
+    $this->assertEquals($expectedRightAttributes, $results['right']['#attributes']);
+  }
+
+  /**
+   * @covers ::build
+   */
+  public function testBuildAltLayout() {
+    $layoutPlugin = $this->getLayoutOptionsPlugin('layout_only_in_regions');
+    $layoutPlugin->setConfiguration($layoutPlugin->defaultConfiguration());
+
+    $form = [];
+    $formState = new FormState();
+    $values = [
+      'layout_only' => 'layout-only-class',
+      'layout_bg_color' => 'bg-info',
+      'layout_class_checkboxes' => ['checkbox1', 'checkbox2'],
+      'left' => [
+        'layout_only' => 'layout-only-left-class',
+      ],
+      'right' => [
+        'layout_id_theme' => 'test-right-id',
+      ],
+    ];
+    $formState->setValues($values);
+    $layoutPlugin->submitConfigurationForm($form, $formState);
+
+    $regions = [
+      'left' => [
+        '#markup' => "<p>Left</p>",
+        '#view_mode' => 'default',
+      ],
+      'right' => [
+        '#markup' => "<p>Right</p>",
+        '#view_mode' => 'default',
+      ],
+    ];
+
+    $results = $layoutPlugin->build($regions);
+    $expectedSettings = [
+      'layout_only' => 'layout-only-class',
+      'left' => [
+        'layout_id_theme' => NULL,
+        'layout_bg_color' => NULL,
+        'regions_only' => NULL,
+        'layout_class_checkboxes' => NULL,
+        'layout_only' => 'layout-only-left-class',
+      ],
+      'right' => [
+        'layout_id_theme' => 'test-right-id',
+        'layout_bg_color' => NULL,
+        'regions_only' => NULL,
+        'layout_class_checkboxes' => NULL,
+        'layout_only' => NULL,
+      ],
+      'layout_bg_color' => 'bg-info',
+      'layout_id_theme' => NULL,
+      'layout_class_checkboxes' => ['checkbox1', 'checkbox2'],
+    ];
+    // Validate that parent methods were called post Ver 8.7)
+    if ($this->getDrupalMajorMinor() > 8.7) {
+      $expectedSettings['label'] = NULL;
+    }
+    $this->assertEquals($expectedSettings, $results['#settings'], "Setting did not match");
+
+    $expectedTopAttributes = [
+      'class' => ['layout-only-class', 'checkbox1', 'checkbox2', 'bg-info'],
+    ];
+    $this->assertEquals($expectedTopAttributes, $results['#attributes']);
+
+    $expectedLeftAttributes = [
+      'class' => ['layout-only-left-class'],
     ];
     $this->assertEquals($expectedLeftAttributes, $results['left']['#attributes']);
 

@@ -138,7 +138,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface, Contai
     $options = $this->parseLayoutOptions($this->getPluginDefinition()->id());
     $keys = array_keys($options);
     foreach ($keys as $optionId) {
-      $optionDef = $this->getLayoutDefinition($optionId);
+      $optionDef = $this->getLayoutDefinition($optionId, $options);
       $plugin = $this->getOptionPlugin($optionId, $optionDef);
       if ($plugin !== NULL) {
         $configuration = $plugin->addDefaults($configuration);
@@ -158,7 +158,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface, Contai
 
     $optionIds = array_keys($defs);
     foreach ($optionIds as $optionId) {
-      $optionDef = $this->getLayoutDefinition($optionId);
+      $optionDef = $this->getLayoutDefinition($optionId, $defs);
       $plugin = $this->getOptionPlugin($optionId, $optionDef);
       if ($plugin !== NULL) {
         $build = $plugin->buildOption($regions, $build);
@@ -203,10 +203,11 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface, Contai
         '#value' => $field,
       ];
     }
-    $def = $this->parseLayoutOptions($this->getPluginDefinition()->id(), $field);
-    $keys = array_keys($def);
+    $defs = $this->parseLayoutOptions($this->getPluginDefinition()->id(), $field);
+    $keys = array_keys($defs);
     foreach ($keys as $optionId) {
-      $plugin = $this->getOptionPlugin($optionId, $def[$optionId]);
+      $optionDef = $this->getLayoutDefinition($optionId, $defs);
+      $plugin = $this->getOptionPlugin($optionId, $optionDef);
       if ($plugin) {
         $form = $plugin->addOptionFormElement('layout', $form, $form_state);
       }
@@ -218,7 +219,8 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface, Contai
         '#title' => $this->t('@region region', ['@region' => $regionLabel]),
       ];
       foreach ($keys as $optionId) {
-        $plugin = $this->getOptionPlugin($optionId, $def[$optionId]);
+        $optionDef = $this->getLayoutDefinition($optionId, $defs);
+        $plugin = $this->getOptionPlugin($optionId, $optionDef);
         if ($plugin) {
           $form = $plugin->addOptionFormElement($region, $form, $form_state);
         }
@@ -246,7 +248,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface, Contai
     $options = $this->parseLayoutOptions($this->getPluginDefinition()->id(), $field);
     $keys = array_keys($options);
     foreach ($keys as $optionId) {
-      $optionDef = $this->getLayoutDefinition($optionId);
+      $optionDef = $this->getLayoutDefinition($optionId, $options);
       $plugin = $this->getOptionPlugin($optionId, $optionDef);
       if ($plugin !== NULL) {
         $plugin->validateFormOption($form, $formState);
@@ -272,7 +274,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface, Contai
 
     $keys = array_keys($options);
     foreach ($keys as $optionId) {
-      $optionDef = $this->getLayoutDefinition($optionId);
+      $optionDef = $this->getLayoutDefinition($optionId, $options);
       $plugin = $this->getOptionPlugin($optionId, $optionDef);
       if ($plugin !== NULL) {
         $configuration = $plugin->submitFormOption($configuration, $form, $formState);
@@ -331,6 +333,9 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface, Contai
   /**
    * Gets all the layout option definitions.
    *
+   * NOTE: This is the default definitions not parsed with any rules.  Use
+   * parseLayoutOptions() to get the context specific definitions.
+   *
    * @return string[]
    *   The layout option definitions keyed by option id or an empty array
    *   if not found.
@@ -345,12 +350,13 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface, Contai
    *
    * @param string $id
    *   The option id to lookup.
+   * @param array $defs
+   *   The context specfic definitions to use (e.g from parseLayoutOptions).
    *
    * @return string[]
    *   The definition array or an empty array if not found.
    */
-  public function getLayoutDefinition($id) {
-    $defs = $this->getLayoutDefinitions();
+  public function getLayoutDefinition($id, array $defs) {
     return isset($defs[$id]) ? $defs[$id] : [];
   }
 

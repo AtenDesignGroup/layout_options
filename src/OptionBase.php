@@ -111,12 +111,13 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     $optionId = $this->getOptionId();
     $layoutRegions = array_merge(['layout'], $this->getLayoutDefinition()->getRegionNames());
     $configuration = $this->getLayoutPlugin()->getConfiguration();
+
     // Make the top level layout area look like a region.
     if (isset($configuration[$optionId])) {
       $configuration['layout'][$optionId] = $configuration[$optionId];
     }
     foreach ($layoutRegions as $region) {
-      if ($this->isAllowed($region)  && !empty($configuration[$region][$optionId])) {
+      if ($this->isAllowed($region) && !empty($configuration[$region][$optionId])) {
         $build = $this->processOptionBuild($regions, $build, $region, $configuration[$region][$optionId]);
       }
     }
@@ -528,8 +529,8 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
   /**
    * Get the Layout plugin using this option plug's definition.
    *
-   * @return string[]
-   *   Array with the plugin definition.
+   * @return \Drupal\Core\Layout\LayoutDefinition
+   *   Layout definition object.
    */
   public function getLayoutDefinition() {
     return $this->getLayoutPlugin()->getPluginDefinition();
@@ -579,7 +580,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
 
     $regions = array_merge(['layout'], $this->getLayoutDefinition()->getRegionNames());
     foreach ($regions as $region) {
-      $value = $this->getFOrmValue($formState, $region, $optionId);
+      $value = $this->getFormValue($formState, $region, $optionId);
       if ($value && !$this->isValidCssIdentifier($value, $multi)) {
         $formState->setErrorByName($optionId, $this->t("Invalid CSS identifier."));
       }
