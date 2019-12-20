@@ -33,7 +33,7 @@ class IdAttributeOption extends OptionBase {
   /**
    * {@inheritdoc}
    */
-  public function processOptionBuild($regions, $build, $region, $value) {
+  public function processOptionBuild(array $regions, array $build, string $region, $value) {
     return $this->processAttributeOptionBuild('id', $regions, $build, $region, $value);
   }
 

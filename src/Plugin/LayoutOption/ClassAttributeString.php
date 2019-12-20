@@ -35,7 +35,7 @@ class ClassAttributeString extends OptionBase {
   /**
    * {@inheritdoc}
    */
-  public function processOptionBuild($regions, $build, $region, $value) {
+  public function processOptionBuild(array $regions, array $build, string $region, $value) {
     return $this->processAttributeOptionBuild('class', $regions, $build, $region, $value);
   }
 

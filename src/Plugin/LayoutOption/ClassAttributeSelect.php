@@ -34,12 +34,12 @@ class ClassAttributeSelect extends OptionBase {
   /**
    * {@inheritdoc}
    */
-  public function processOptionBuild($regions, $build, $region, $value) {
+  public function processOptionBuild(array $regions, array $build, string $region, $value) {
     return $this->processAttributeOptionBuild('class', $regions, $build, $region, $value);
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getDefinitionAttributes() {
     return array_merge(parent::getDefinitionAttributes(), [
