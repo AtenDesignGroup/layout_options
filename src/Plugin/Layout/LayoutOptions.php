@@ -213,11 +213,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface, Contai
       }
     }
     foreach ($this->getPluginDefinition()->getRegions() as $region => $regionInfo) {
-      $regionLabel = $regionInfo['label'];
-      $form[$region] = [
-        '#type' => 'details',
-        '#title' => $this->t('@region region', ['@region' => $regionLabel]),
-      ];
+      $form[$region] = [];
       foreach ($keys as $optionId) {
         $optionDef = $this->getLayoutDefinition($optionId, $defs);
         $plugin = $this->getOptionPlugin($optionId, $optionDef);
@@ -225,8 +221,14 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface, Contai
           $form = $plugin->addOptionFormElement($region, $form, $form_state);
         }
       }
+      // Remove empty regions.
       if (empty($form[$region])) {
-        $form[$region]['#access'] = FALSE;
+        unset($form[$region]);
+      }
+      else {
+        $regionLabel = $regionInfo['label'];
+        $form[$region]['#type'] = 'details';
+        $form[$region]['#title'] = $this->t('@region region', ['@region' => $regionLabel]);
       }
     }
     return $form;
