@@ -99,6 +99,9 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
     if ($region === 'layout') {
       return $def['layout'];
     }
+    elseif (isset($def['allowed_regions'])) {
+      return (in_array($region, $def['allowed_regions']) && $def['regions']);
+    }
     else {
       return $def['regions'];
     }
