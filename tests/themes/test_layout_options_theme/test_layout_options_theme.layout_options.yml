@@ -97,3 +97,18 @@ layout_options:
 
     layout_only:
       regions: true
+
+  #disable region options
+  empty_regions:
+  
+    regions_only:
+      regions: false
+    layout_class_checkboxes:
+      regions: false
+    layout_id_theme:
+      regions: false
+    layout_bg_color:
+      regions: false
+
+  
+    

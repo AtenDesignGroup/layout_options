@@ -219,6 +219,7 @@ class LayoutOptionsTest extends KernelTestBase {
     $layoutPlugin = $this->getLayoutOptionsPlugin();
     $results = $layoutPlugin->parseLayoutOptions('my_layout_2col_50_50');
     $keys = array_keys($results);
+    sort($keys);
     $expected = [
       'layout_only',
       'regions_only',
@@ -228,6 +229,7 @@ class LayoutOptionsTest extends KernelTestBase {
       'layout_bg_color',
       'layout_id',
     ];
+    sort($expected);
     $this->assertSame($expected, $keys, "Did not find all layout options.");
     $this->assertFalse($results['layout_bg_color']['regions'], "Module layout override didn't work.");
     $this->assertFalse($results['layout_id']['layout'], "Theme global override didn't work.");
@@ -314,26 +316,40 @@ class LayoutOptionsTest extends KernelTestBase {
       'layout_only', 'layout_class_checkboxes', 'layout_id_theme',
       'layout_bg_color', 'left', 'right',
     ];
-    $this->assertEquals($expectedTopKeys, array_keys($results), "Expected top keys not found.");
+    sort($expectedTopKeys);
+    $test = array_keys($results);
+    sort($test);
+    $this->assertEquals($expectedTopKeys, $test, "Expected top keys not found.");
 
     $expectedLeftKeys = [
       '#type', '#title', 'regions_only', 'layout_class_checkboxes', 'layout_id_theme', 'layout_bg_color',
     ];
-    $this->assertEquals($expectedLeftKeys, array_keys($results['left']), "Expected left region keys not found.");
+    sort($expectedLeftKeys);
+    $test = array_keys($results['left']);
+    sort($test);
+    $this->assertEquals($expectedLeftKeys, $test, "Expected left region keys not found.");
 
     $expectedLeftIdKeys = [
       '#title', '#description', '#type', '#default_value', '#weight',
     ];
-    $this->assertEquals($expectedLeftIdKeys, array_keys($results['left']['layout_id_theme']), "Expected left region layout_id_theme form fields not found.");
+    sort($expectedLeftIdKeys);
+    $test = array_keys($results['left']['layout_id_theme']);
+    sort($test);
+    $this->assertEquals($expectedLeftIdKeys, $test, "Expected left region layout_id_theme form fields not found.");
 
     // Check that weight not set.
     $expectedLeftRegionOnlyKeys = [
       '#title', '#description', '#type', '#default_value',
     ];
-    $this->assertEquals($expectedLeftRegionOnlyKeys, array_keys($results['left']['regions_only']), "Expected left region region_only form fields not found.");
+    sort($expectedLeftRegionOnlyKeys);
+    $test = array_keys($results['left']['regions_only']);
+    sort($test);
+    $this->assertEquals($expectedLeftRegionOnlyKeys, $test, "Expected left region region_only form fields not found.");
   }
 
   /**
+   * Test that rules can override definition settings.
+   *
    * @covers ::processConfigurationForm
    */
   public function testProcessConfigurationFormAltLayout() {
@@ -347,25 +363,59 @@ class LayoutOptionsTest extends KernelTestBase {
       'layout_only', 'layout_class_checkboxes', 'layout_id_theme',
       'layout_bg_color', 'left', 'right',
     ];
-    $this->assertEquals($expectedTopKeys, array_keys($results), "Expected top keys not found.");
+    sort($expectedTopKeys);
+    $test = array_keys($results);
+    sort($test);
+    $this->assertEquals($expectedTopKeys, $test, "Expected top keys not found.");
 
+    // Test that layout_only option shows up in region
     $expectedLeftKeys = [
       '#type', '#title', 'layout_only', 'regions_only', 'layout_class_checkboxes', 'layout_id_theme', 'layout_bg_color',
     ];
-    $this->assertEquals($expectedLeftKeys, array_keys($results['left']), "Expected left region keys not found.");
+    sort($expectedLeftKeys);
+    $test = array_keys($results['left']);
+    sort($test);
+    $this->assertEquals($expectedLeftKeys, $test, "Expected left region keys not found.");
 
     $expectedLeftIdKeys = [
       '#title', '#description', '#type', '#default_value', '#weight',
     ];
-    $this->assertEquals($expectedLeftIdKeys, array_keys($results['left']['layout_id_theme']), "Expected left region layout_id_theme form fields not found.");
+    sort($expectedLeftIdKeys);
+    $test = array_keys($results['left']['layout_id_theme']);
+    sort($test);
+    $this->assertEquals($expectedLeftIdKeys, $test, "Expected left region layout_id_theme form fields not found.");
 
     // Check that weight not set.
     $expectedLeftRegionOnlyKeys = [
       '#title', '#description', '#type', '#default_value',
     ];
-    $this->assertEquals($expectedLeftRegionOnlyKeys, array_keys($results['left']['layout_only']), "Expected left region layout_only form fields not found.");
+    sort($expectedLeftRegionOnlyKeys);
+    $test = array_keys($results['left']['layout_only']);
+    sort($test);
+    $this->assertEquals($expectedLeftRegionOnlyKeys, $test, "Expected left region layout_only form fields not found.");
   }
 
+  /**
+   * Test that region configuration field does not show up if empty.
+   *
+   * @covers ::processConfigurationForm
+   */
+  public function testProcessConfigurationFormEmptyRegion() {
+    $form = [];
+    $formState = new FormState();
+    $formState->addBuildInfo('callback_object', new \stdClass());
+    $layoutPlugin = $this->getLayoutOptionsPlugin('empty_regions');
+
+    $results = $layoutPlugin->processConfigurationForm($form, $formState);
+    $expectedTopKeys = [
+      'layout_only', 'layout_class_checkboxes', 'layout_id_theme',
+      'layout_bg_color',
+    ];
+    sort($expectedTopKeys);
+    $test = array_keys($results);
+    sort($test);
+    $this->assertEquals($expectedTopKeys, $test, "Expected top keys not found.");
+  }
   /**
    * @covers ::submitConfigurationForm
    */
