@@ -66,6 +66,14 @@ layout_option_definitions:
     layout: true
     regions: false
 
+  left_only:
+    title: 'Left only option'
+    description: 'Test for left region only options'
+    default: ''
+    plugin: 'layout_options_class_string'
+    layout: false
+    regions: true
+    allowed_regions: [left]
 #
 # This section of the yaml file defines the "rules" used to determine which options are shown.
 # It can also be used to override the settings defined in the definition area.
@@ -93,6 +101,8 @@ layout_options:
 
     layout_only: {}
 
+    left_only: {}
+
   layout_only_in_regions:
 
     layout_only:
@@ -108,6 +118,8 @@ layout_options:
     layout_id_theme:
       regions: false
     layout_bg_color:
+      regions: false
+    left_only:
       regions: false
 
   

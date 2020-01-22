@@ -26,7 +26,8 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
    *
    * @var array
    */
-  protected $optionalAttributes = ['weight'];
+  protected $optionalAttributes =
+    ['weight', 'allowed_regions'];
 
   /**
    * {@inheritdoc}
@@ -632,6 +633,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
       'layout' => 'boolean',
       'regions' => 'boolean',
       'weight' => 'integer',
+      'allowed_regions' => 'array',
     ];
   }
 

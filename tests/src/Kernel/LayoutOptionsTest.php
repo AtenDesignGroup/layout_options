@@ -228,6 +228,7 @@ class LayoutOptionsTest extends KernelTestBase {
       'layout_design_classes',
       'layout_bg_color',
       'layout_id',
+      'left_only',
     ];
     sort($expected);
     $this->assertSame($expected, $keys, "Did not find all layout options.");
@@ -322,12 +323,18 @@ class LayoutOptionsTest extends KernelTestBase {
     $this->assertEquals($expectedTopKeys, $test, "Expected top keys not found.");
 
     $expectedLeftKeys = [
-      '#type', '#title', 'regions_only', 'layout_class_checkboxes', 'layout_id_theme', 'layout_bg_color',
+      '#type', '#title', 'regions_only', 'layout_class_checkboxes',
+      'layout_id_theme', 'layout_bg_color', 'left_only'
     ];
     sort($expectedLeftKeys);
     $test = array_keys($results['left']);
     sort($test);
     $this->assertEquals($expectedLeftKeys, $test, "Expected left region keys not found.");
+
+    // Test the left only key does not appear in right region
+    $test = array_keys($results['right']);
+    sort($test);
+    $this->assertArrayNotHasKey('left_only', $test, "Left only key found in right region.");
 
     $expectedLeftIdKeys = [
       '#title', '#description', '#type', '#default_value', '#weight',
@@ -370,7 +377,8 @@ class LayoutOptionsTest extends KernelTestBase {
 
     // Test that layout_only option shows up in region
     $expectedLeftKeys = [
-      '#type', '#title', 'layout_only', 'regions_only', 'layout_class_checkboxes', 'layout_id_theme', 'layout_bg_color',
+      '#type', '#title', 'layout_only', 'regions_only', 'layout_class_checkboxes',
+      'layout_id_theme', 'layout_bg_color', 'left_only'
     ];
     sort($expectedLeftKeys);
     $test = array_keys($results['left']);
@@ -447,6 +455,7 @@ class LayoutOptionsTest extends KernelTestBase {
         'layout_bg_color' => 'bg-success',
         'regions_only' => NULL,
         'layout_class_checkboxes' => NULL,
+        'left_only' => NULL,
       ],
       'right' => [
         'layout_id_theme' => 'test-right-id',
@@ -499,6 +508,7 @@ class LayoutOptionsTest extends KernelTestBase {
         'regions_only' => NULL,
         'layout_class_checkboxes' => NULL,
         'layout_only' => 'layout-only-left-class',
+        'left_only' => NULL,
       ],
       'right' => [
         'layout_id_theme' => 'test-right-id',
@@ -561,6 +571,7 @@ class LayoutOptionsTest extends KernelTestBase {
         'layout_bg_color' => NULL,
         'regions_only' => NULL,
         'layout_class_checkboxes' => NULL,
+        'left_only' => NULL,
       ],
       'right' => [
         'layout_id_theme' => 'test-right-id',
@@ -638,6 +649,7 @@ class LayoutOptionsTest extends KernelTestBase {
         'regions_only' => NULL,
         'layout_class_checkboxes' => NULL,
         'layout_only' => 'layout-only-left-class',
+        'left_only' => NULL,
       ],
       'right' => [
         'layout_id_theme' => 'test-right-id',
