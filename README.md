@@ -105,6 +105,8 @@ information like this:
           bg-transparent: 'Transparent'
         layout: true  # allow option to be used in the overall layout container
         regions: true # allow this option to be used in any regions
+        allowed_regions: [left, right]  #optional attribute to limit regions
+        weight:  1 # optionally use to order options
 
 This module supplies the following layoutOption plug-ins:
 

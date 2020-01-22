@@ -21,6 +21,7 @@ layout_option_definitions:
     layout: true
     regions: true
     weight: -100  #optional attribute to set form location.
+    allowed_regions: [left,top] #optional attribute to limit regions
 
   #
   # This defines a background color option using BS 4 classes.
