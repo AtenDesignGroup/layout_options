@@ -2,6 +2,6 @@ name: 'Layout Options'
 type: module
 description: 'Provides a layout plugin that allows for styling options to be added to layouts via YAML files'
 core: 8.x
-package: 'Custom'
+package: 'Layout'
 dependencies:
   - drupal:layout_discovery

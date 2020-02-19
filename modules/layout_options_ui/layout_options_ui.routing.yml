@@ -1,0 +1,7 @@
+layout_options_ui.settings:
+  path: '/admin/config/system/layout_options/config'
+  defaults:
+    _form: '\Drupal\layout_options_ui\Form\Settings'
+    _title: 'Layout Options Override Settings'
+  requirements:
+    _permission: 'administer site configuration'

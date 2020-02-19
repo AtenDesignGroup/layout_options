@@ -1,0 +1,45 @@
+<?php
+
+/**
+ * @file
+ * Contains layout_options_ui.module.
+ */
+
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function layout_options_ui_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.layout_options_ui':
+      $text = file_get_contents(__DIR__ . '/README.md');
+      if (!\Drupal::moduleHandler()->moduleExists('markdown')) {
+        return '<pre>' . Html::escape($text) . '</pre>';
+      }
+      else {
+        // Use the Markdown filter to render the README.
+        $filter_manager = \Drupal::service('plugin.manager.filter');
+        $settings = \Drupal::configFactory()->get('markdown.settings')->getRawData();
+        $config = ['settings' => $settings];
+        $filter = $filter_manager->createInstance('markdown', $config);
+        return $filter->process($text, 'en');
+      }
+  }
+  return NULL;
+}
+
+/**
+ * Implements hook_layout_alter().
+ */
+function layout_options_ui_layout_alter(&$definitions) {
+  $config = \Drupal::config('layout_options.settings');
+  $settings = $config->get('layout_overrides');
+  foreach ($definitions as $key => $definition) {
+    $providerKey = "{$definition->getProvider()}__{$key}";
+    if (isset($settings[$providerKey]) && $settings[$providerKey] == 1) {
+      $definitions[$key]->setClass('\Drupal\layout_options\Plugin\Layout\LayoutOptions');
+    }
+  }
+}

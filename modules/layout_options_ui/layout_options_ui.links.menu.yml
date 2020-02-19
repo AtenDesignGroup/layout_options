@@ -1,0 +1,5 @@
+layout_options_ui.settings:
+  title: 'Layout Options'
+  description: 'Layout Options override settings'
+  route_name: layout_options_ui.settings
+  parent: system.admin_config_system

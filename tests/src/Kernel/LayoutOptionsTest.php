@@ -324,14 +324,14 @@ class LayoutOptionsTest extends KernelTestBase {
 
     $expectedLeftKeys = [
       '#type', '#title', 'regions_only', 'layout_class_checkboxes',
-      'layout_id_theme', 'layout_bg_color', 'left_only'
+      'layout_id_theme', 'layout_bg_color', 'left_only',
     ];
     sort($expectedLeftKeys);
     $test = array_keys($results['left']);
     sort($test);
     $this->assertEquals($expectedLeftKeys, $test, "Expected left region keys not found.");
 
-    // Test the left only key does not appear in right region
+    // Test the left only key does not appear in right region.
     $test = array_keys($results['right']);
     sort($test);
     $this->assertArrayNotHasKey('left_only', $test, "Left only key found in right region.");
@@ -375,10 +375,10 @@ class LayoutOptionsTest extends KernelTestBase {
     sort($test);
     $this->assertEquals($expectedTopKeys, $test, "Expected top keys not found.");
 
-    // Test that layout_only option shows up in region
+    // Test that layout_only option shows up in region.
     $expectedLeftKeys = [
       '#type', '#title', 'layout_only', 'regions_only', 'layout_class_checkboxes',
-      'layout_id_theme', 'layout_bg_color', 'left_only'
+      'layout_id_theme', 'layout_bg_color', 'left_only',
     ];
     sort($expectedLeftKeys);
     $test = array_keys($results['left']);
@@ -424,6 +424,7 @@ class LayoutOptionsTest extends KernelTestBase {
     sort($test);
     $this->assertEquals($expectedTopKeys, $test, "Expected top keys not found.");
   }
+
   /**
    * @covers ::submitConfigurationForm
    */
