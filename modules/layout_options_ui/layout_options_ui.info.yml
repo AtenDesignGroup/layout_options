@@ -2,6 +2,7 @@ name: 'Layout Options UI'
 type: module
 description: 'Provides a way to replace the default Layout class with the Layout Options class in existing templates'
 core: 8.x
+core_version_requirement: ^8 || ^9
 package: 'Layout'
 configure: layout_options_ui.settings
 
