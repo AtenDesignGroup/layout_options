@@ -460,7 +460,7 @@ class LayoutOptions extends LayoutDefault implements PluginFormInterface, Contai
   public function getOptionPlugin(string $optionId, array $optionDefinition, bool $bypassCache = FALSE) {
     if (!isset($this->optionPlugins[$optionId]) || $bypassCache) {
       if (!isset($optionDefinition['plugin'])) {
-        $this->messenger->addError(t("Option definition, @option (@title), does not define a plugin id", ['@option' => $optionId, '@title' => isset($optionDefinition['title']) ? $optionDefinition['title'] : '']));
+        $this->messenger()->addError($this->t("Option definition, @option (@title), does not define a plugin id", ['@option' => $optionId, '@title' => isset($optionDefinition['title']) ? $optionDefinition['title'] : '']));
         $this->getLogger('layout_options')->warning("Option definition, @option (@title), does not define a plugin id", ['@option' => $optionId, '@title' => '' /*$optionDefinition['title']*/]);
         return NULL;
       }
