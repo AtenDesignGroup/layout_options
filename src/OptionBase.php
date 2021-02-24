@@ -447,7 +447,7 @@ abstract class OptionBase extends PluginBase implements OptionInterface {
       '#options' => $this->translateOptions($def['options']),
       '#default_value' => $default,
     ];
-    if ($def['inline']) {
+    if (!empty($def['inline'])) {
       $formRenderArray['#attributes'] = ['class' => ['container-inline']];
     }
     if (isset($def['weight'])) {
